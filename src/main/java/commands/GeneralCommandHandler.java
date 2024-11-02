@@ -26,6 +26,7 @@ public class GeneralCommandHandler implements Runnable {
         while (true) {
             try {
                 String command = in.readLine();
+                System.out.println("Received command: " + command);
 
                 if (Objects.equals(command, "exit")) break;
 
