@@ -9,7 +9,7 @@ public class PingCommandHandler implements CommandHandler {
 
     @Override
     public boolean canHandle(String command) {
-        return PING.equalsIgnoreCase(command);
+        return true;
     }
 
     @Override
