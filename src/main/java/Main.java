@@ -1,3 +1,5 @@
+import commands.GeneralCommandHandler;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -17,6 +19,8 @@ public class Main {
             serverSocket.setReuseAddress(true);
             // Wait for connection from client.
             clientSocket = serverSocket.accept();
+            GeneralCommandHandler handler = new GeneralCommandHandler(clientSocket);
+            handler.run();
         } catch (IOException e) {
             System.out.println("IOException: " + e.getMessage());
         } finally {
