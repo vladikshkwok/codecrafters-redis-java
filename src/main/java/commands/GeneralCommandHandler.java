@@ -60,7 +60,7 @@ public class GeneralCommandHandler implements Runnable {
     }
 
     private String parseRedisString(String command) throws IOException {
-        int strlen = Integer.parseInt(command.substring(1, command.length() - 1));
+        int strlen = Integer.parseInt(command.substring(1));
         String str = in.readLine();
         if (str.length() > strlen) {
             throw new IllegalArgumentException();
