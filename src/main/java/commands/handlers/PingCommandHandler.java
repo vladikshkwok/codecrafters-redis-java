@@ -14,6 +14,6 @@ public class PingCommandHandler implements CommandHandler {
 
     @Override
     public void handle(PrintWriter out) {
-        out.println("PONG");
+        out.println("+PONG\r");
     }
 }
