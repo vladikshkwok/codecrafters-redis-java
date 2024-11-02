@@ -6,6 +6,7 @@ import commands.handlers.PingCommandHandler;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -25,13 +26,18 @@ public class GeneralCommandHandler implements Runnable {
     public void run() {
         while (true) {
             try {
-                String command = in.readLine();
-                System.out.println("Received command: " + command);
+                Object o = parseCommand();
+                String first;
+                if (o instanceof List<?>) {
+                    first = (String) ((List<?>) o).getFirst();
+                } else {
+                    first = "";
+                }
 
-                if (Objects.equals(command, "exit")) break;
+                if (Objects.equals(first, "exit")) break;
 
                 commandHandlers.stream()
-                    .filter(commandHandler -> commandHandler.canHandle(command))
+                    .filter(commandHandler -> commandHandler.canHandle(first))
                     .findAny()
                     .orElse(new DefaultCommandHandler())
                     .handle(out);
@@ -40,4 +46,35 @@ public class GeneralCommandHandler implements Runnable {
             }
         }
     }
+
+    public Object parseCommand() throws IOException {
+        String command = in.readLine();
+        System.out.println("Received command: " + command);
+        if (command.charAt(0) == '*') {
+            return parseRedisArray(command);
+        }
+        if (command.charAt(0) == '$') {
+            return parseRedisString(command);
+        }
+        throw new IllegalArgumentException();
+    }
+
+    private String parseRedisString(String command) throws IOException {
+        int strlen = Integer.parseInt(command.substring(1, command.length() - 1));
+        String str = in.readLine();
+        if (str.length() > strlen) {
+            throw new IllegalArgumentException();
+        }
+        return str;
+    }
+
+    private List<String> parseRedisArray(String command) throws IOException {
+        List<String> list = new ArrayList<>();
+        int arraylen = Integer.parseInt(command.substring(1, command.length() - 1));
+        for (int i = 0; i < arraylen; i++) {
+            list.add((String) parseCommand());
+        }
+        return list;
+    }
+}
 }
