@@ -70,7 +70,7 @@ public class GeneralCommandHandler implements Runnable {
 
     private List<String> parseRedisArray(String command) throws IOException {
         List<String> list = new ArrayList<>();
-        int arraylen = Integer.parseInt(command.substring(1, command.length() - 1));
+        int arraylen = Integer.parseInt(command.substring(1));
         for (int i = 0; i < arraylen; i++) {
             list.add((String) parseCommand());
         }
