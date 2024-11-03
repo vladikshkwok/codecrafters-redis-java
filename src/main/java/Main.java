@@ -18,9 +18,12 @@ public class Main {
             // ensures that we don't run into 'Address already in use' errors
             serverSocket.setReuseAddress(true);
             // Wait for connection from client.
-            clientSocket = serverSocket.accept();
-            GeneralCommandHandler handler = new GeneralCommandHandler(clientSocket);
-            handler.run();
+            while (true) {
+                System.out.println("waiting for client connection...");
+                clientSocket = serverSocket.accept();
+                System.out.println("client connected: " + clientSocket.getRemoteSocketAddress());
+                new Thread(new GeneralCommandHandler(clientSocket)).start();
+            }
         } catch (IOException e) {
             System.out.println("IOException: " + e.getMessage());
         } finally {
