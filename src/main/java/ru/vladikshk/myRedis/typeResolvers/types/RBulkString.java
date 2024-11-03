@@ -1,4 +1,4 @@
-package myRedis.typeResolvers.types;
+package ru.vladikshk.myRedis.typeResolvers.types;
 
 public class RBulkString extends RType {
     private String str;

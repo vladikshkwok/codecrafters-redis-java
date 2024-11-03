@@ -1,17 +1,19 @@
-package myRedis.commands.handlers;
+package ru.vladikshk.myRedis.commands.handlers;
 
-import myRedis.StorageService;
-import myRedis.typeResolvers.types.RBulkString;
+import lombok.extern.slf4j.Slf4j;
+import ru.vladikshk.myRedis.service.SimpleStorageService;
+import ru.vladikshk.myRedis.typeResolvers.types.RBulkString;
 
 import java.io.OutputStream;
 import java.util.List;
 
-import static myRedis.commands.handlers.CommandHandler.print;
+import static ru.vladikshk.myRedis.commands.handlers.CommandHandler.print;
 
+@Slf4j
 public class SetCommandHandler implements CommandHandler {
-    private final StorageService storageService;
+    private final SimpleStorageService storageService;
 
-    public SetCommandHandler(StorageService storageService) {
+    public SetCommandHandler(SimpleStorageService storageService) {
         this.storageService = storageService;
     }
 
@@ -28,8 +30,10 @@ public class SetCommandHandler implements CommandHandler {
         if (args.size() > 3) {
             int expireMs = Integer.parseInt(args.get(4));
             storageService.put(key, value, expireMs);
+            log.info("Set element {}:{} with expiration in {} ms", key, value, expireMs);
         } else {
             storageService.put(key, value);
+            log.info("Set element {}:{}", key, value);
         }
 
         print(out, new RBulkString("OK").getBytes());

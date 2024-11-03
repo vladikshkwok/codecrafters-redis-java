@@ -1,4 +1,4 @@
-package myRedis.commands.handlers;
+package ru.vladikshk.myRedis.commands.handlers;
 
 import java.io.IOException;
 import java.io.OutputStream;

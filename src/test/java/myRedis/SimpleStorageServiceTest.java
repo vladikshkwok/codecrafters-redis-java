@@ -1,14 +1,15 @@
 package myRedis;
 
 
+import ru.vladikshk.myRedis.service.SimpleStorageService;
 import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 
-public class StorageServiceTest {
-    private final StorageService storageService = new StorageService();
+public class SimpleStorageServiceTest {
+    private final SimpleStorageService storageService = new SimpleStorageService();
 
     @Test
     public void TestPutWitExpiration() throws InterruptedException {

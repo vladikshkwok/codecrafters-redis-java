@@ -1,13 +1,15 @@
-package myRedis.commands.handlers;
+package ru.vladikshk.myRedis.commands.handlers;
 
-import myRedis.StorageService;
-import myRedis.typeResolvers.types.RBulkString;
+import lombok.extern.slf4j.Slf4j;
+import ru.vladikshk.myRedis.service.StorageService;
+import ru.vladikshk.myRedis.typeResolvers.types.RBulkString;
 
 import java.io.OutputStream;
 import java.util.List;
 
-import static myRedis.commands.handlers.CommandHandler.print;
+import static ru.vladikshk.myRedis.commands.handlers.CommandHandler.print;
 
+@Slf4j
 public class GetCommandHandler implements CommandHandler {
     private final StorageService storageService;
 
@@ -26,6 +28,7 @@ public class GetCommandHandler implements CommandHandler {
 
         String value = storageService.get(key);
         print(out, new RBulkString(value).getBytes());
+        log.info("Got element={}:{} from storage", key, value);
     }
 
 }

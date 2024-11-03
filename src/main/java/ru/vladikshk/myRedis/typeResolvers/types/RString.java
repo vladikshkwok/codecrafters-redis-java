@@ -1,4 +1,4 @@
-package myRedis.typeResolvers.types;
+package ru.vladikshk.myRedis.typeResolvers.types;
 
 public class RString extends RType {
     private String str;

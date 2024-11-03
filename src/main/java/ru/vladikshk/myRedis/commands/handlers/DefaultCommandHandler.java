@@ -1,12 +1,14 @@
-package myRedis.commands.handlers;
+package ru.vladikshk.myRedis.commands.handlers;
 
-import myRedis.typeResolvers.types.RBulkString;
+import lombok.extern.slf4j.Slf4j;
+import ru.vladikshk.myRedis.typeResolvers.types.RBulkString;
 
 import java.io.OutputStream;
 import java.util.List;
 
-import static myRedis.commands.handlers.CommandHandler.print;
+import static ru.vladikshk.myRedis.commands.handlers.CommandHandler.print;
 
+@Slf4j
 public class DefaultCommandHandler implements CommandHandler {
 
     @Override
@@ -17,5 +19,6 @@ public class DefaultCommandHandler implements CommandHandler {
     @Override
     public void handle(List<String> args, OutputStream out) {
         print(out, new RBulkString("Couldn't handle command").getBytes());
+        log.warn("Couldn't handle command with args: {}", args);
     }
 }
