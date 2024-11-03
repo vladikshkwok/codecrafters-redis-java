@@ -1,19 +1,18 @@
 package commands.handlers;
 
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.net.Socket;
+import java.util.List;
 
 public class PingCommandHandler implements CommandHandler {
     private static final String PING = "PING";
 
     @Override
     public boolean canHandle(String command) {
-        return true;
+        return PING.equals(command);
     }
 
     @Override
-    public void handle(PrintWriter out) {
+    public void handle(List<String> command, PrintWriter out) {
         out.println("+PONG\r");
     }
 }

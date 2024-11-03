@@ -2,16 +2,17 @@ package commands;
 
 import commands.handlers.CommandHandler;
 import commands.handlers.DefaultCommandHandler;
+import commands.handlers.EchoCommandHandler;
 import commands.handlers.PingCommandHandler;
 
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 public class GeneralCommandHandler implements Runnable {
-    private static List<CommandHandler> commandHandlers = List.of(new PingCommandHandler());
+    private static List<CommandHandler> commandHandlers = List.of(new PingCommandHandler(), new EchoCommandHandler());
     private final Socket socket;
     private BufferedReader in;
     private PrintWriter out;
@@ -27,20 +28,20 @@ public class GeneralCommandHandler implements Runnable {
         while (true) {
             try {
                 Object o = parseCommand();
-                String first;
+                List<String> array;
                 if (o instanceof List<?>) {
-                    first = (String) ((List<?>) o).getFirst();
+                    array = (List<String>) o;
                 } else {
-                    first = "";
+                    array = Collections.emptyList();
                 }
 
-                if (Objects.equals(first, "exit")) break;
+                if (array.size() < 1) continue;
 
                 commandHandlers.stream()
-                    .filter(commandHandler -> commandHandler.canHandle(first))
+                    .filter(commandHandler -> commandHandler.canHandle(array.getFirst()))
                     .findAny()
                     .orElse(new DefaultCommandHandler())
-                    .handle(out);
+                    .handle(array, out);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -50,6 +51,10 @@ public class GeneralCommandHandler implements Runnable {
     public Object parseCommand() throws IOException {
         String command = in.readLine();
         System.out.println("Received command: " + command);
+        if (command == null || command.trim().isEmpty()) {
+            return null;
+        }
+
         if (command.charAt(0) == '*') {
             return parseRedisArray(command);
         }

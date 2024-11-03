@@ -1,6 +1,7 @@
 package commands.handlers;
 
 import java.io.PrintWriter;
+import java.util.List;
 
 public class DefaultCommandHandler implements CommandHandler {
     @Override
@@ -9,7 +10,7 @@ public class DefaultCommandHandler implements CommandHandler {
     }
 
     @Override
-    public void handle(PrintWriter out) {
+    public void handle(List<String> command, PrintWriter out) {
         out.println("Couldn't handle command");
     }
 }
