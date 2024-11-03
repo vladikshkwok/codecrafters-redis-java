@@ -1,9 +1,7 @@
-package commands;
+package myRedis.commands;
 
-import commands.handlers.CommandHandler;
-import commands.handlers.DefaultCommandHandler;
-import commands.handlers.EchoCommandHandler;
-import commands.handlers.PingCommandHandler;
+import myRedis.StorageService;
+import myRedis.commands.handlers.*;
 
 import java.io.*;
 import java.net.Socket;
@@ -12,7 +10,9 @@ import java.util.Collections;
 import java.util.List;
 
 public class GeneralCommandHandler implements Runnable {
-    private static List<CommandHandler> commandHandlers = List.of(new PingCommandHandler(), new EchoCommandHandler());
+    private static StorageService storageService = new StorageService();
+    private static List<CommandHandler> commandHandlers = List.of(new PingCommandHandler(), new EchoCommandHandler(),
+    new SetCommandHandler(storageService), new GetCommandHandler(storageService));
     private final Socket socket;
     private BufferedReader in;
     private OutputStream out;

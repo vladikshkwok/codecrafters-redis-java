@@ -1,4 +1,4 @@
-package commands.typeResolvers;
+package myRedis.typeResolvers;
 
 public class ArrayResolver {
 }

@@ -1,4 +1,6 @@
-import commands.GeneralCommandHandler;
+package myRedis;
+
+import myRedis.commands.GeneralCommandHandler;
 
 import java.io.IOException;
 import java.net.ServerSocket;

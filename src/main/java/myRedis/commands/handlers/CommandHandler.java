@@ -1,8 +1,7 @@
-package commands.handlers;
+package myRedis.commands.handlers;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.util.List;
 
 public interface CommandHandler {
@@ -15,5 +14,5 @@ public interface CommandHandler {
     }
 
     boolean canHandle(String command);
-    void handle(List<String> command, OutputStream out);
+    void handle(List<String> args, OutputStream out);
 }

@@ -1,4 +1,4 @@
-package commands.typeResolvers.types;
+package myRedis.typeResolvers.types;
 
 public class RString extends RType {
     private String str;
@@ -8,6 +8,10 @@ public class RString extends RType {
 
     @Override
     public String toString() {
+        if (str == null) {
+            str = "-1";
+        }
+
         return "+" + str + "\r\n";
     }
 }
