@@ -25,7 +25,13 @@ public class SetCommandHandler implements CommandHandler {
         String key = args.get(1);
         String value = args.get(2);
 
-        storageService.put(key, value);
+        if (args.size() > 3) {
+            int expireMs = Integer.parseInt(args.get(3));
+            storageService.put(key, value, expireMs);
+        } else {
+            storageService.put(key, value);
+        }
+
         print(out, new RBulkString("OK").getBytes());
 
     }
