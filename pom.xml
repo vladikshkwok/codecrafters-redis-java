@@ -9,10 +9,10 @@
     <version>1.0</version>
 
     <properties>
-        <maven.compiler.source>23</maven.compiler.source>
-        <maven.compiler.target>23</maven.compiler.target>
+        <maven.compiler.source>22</maven.compiler.source>
+        <maven.compiler.target>22</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>23</java.version>
+        <java.version>22</java.version>
     </properties>
 
     <build>
@@ -46,6 +46,24 @@
                     </execution>
                 </executions>
             </plugin>
+
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-surefire-plugin</artifactId>-->
+<!--                <version>2.21.0</version>-->
+<!--                <dependencies>-->
+<!--                    <dependency>-->
+<!--                        <groupId>org.junit.platform</groupId>-->
+<!--                        <artifactId>junit-platform-surefire-provider</artifactId>-->
+<!--                        <version>1.2.0-M1</version>-->
+<!--                    </dependency>-->
+<!--                    <dependency>-->
+<!--                        <groupId>org.junit.jupiter</groupId>-->
+<!--                        <artifactId>junit-jupiter-engine</artifactId>-->
+<!--                        <version>5.2.0-M1</version>-->
+<!--                    </dependency>-->
+<!--                </dependencies>-->
+<!--            </plugin>-->
         </plugins>
     </build>
 
@@ -63,9 +81,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-engine</artifactId>
-            <version>1.11.0-M2</version>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <version>5.8.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
