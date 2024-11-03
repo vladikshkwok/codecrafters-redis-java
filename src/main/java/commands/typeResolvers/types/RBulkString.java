@@ -1,13 +1,13 @@
 package commands.typeResolvers.types;
 
-public class RString extends RType {
+public class RBulkString extends RType {
     private String str;
-    public RString(String str) {
+    public RBulkString(String str) {
         this.str = str;
     }
 
     @Override
     public String toString() {
-        return "+" + str + "\r\n";
+        return "$" + str.length() + "\r\n" + str + "\r\n";
     }
 }

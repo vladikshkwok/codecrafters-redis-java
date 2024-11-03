@@ -1,9 +1,12 @@
 package commands.handlers;
 
-import commands.typeResolvers.types.RString;
+import commands.typeResolvers.types.RBulkString;
+import commands.typeResolvers.types.RType;
 
-import java.io.PrintWriter;
+import java.io.OutputStream;
 import java.util.List;
+
+import static commands.handlers.CommandHandler.print;
 
 public class EchoCommandHandler implements CommandHandler {
     private static final String ECHO = "ECHO";
@@ -14,7 +17,9 @@ public class EchoCommandHandler implements CommandHandler {
     }
 
     @Override
-    public void handle(List<String> command, PrintWriter out) {
-        out.print(new RString(command.get(1)));
+    public void handle(List<String> command, OutputStream out) {
+        RType echoArgs = new RBulkString(command.get(1));
+        print(out, echoArgs.getBytes());
     }
+
 }

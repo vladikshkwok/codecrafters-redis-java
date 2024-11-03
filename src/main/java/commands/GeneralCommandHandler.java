@@ -15,12 +15,12 @@ public class GeneralCommandHandler implements Runnable {
     private static List<CommandHandler> commandHandlers = List.of(new PingCommandHandler(), new EchoCommandHandler());
     private final Socket socket;
     private BufferedReader in;
-    private PrintWriter out;
+    private OutputStream out;
 
     public GeneralCommandHandler(Socket socket) throws IOException {
         this.socket = socket;
         this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        this.out = new PrintWriter(socket.getOutputStream(), true);
+        this.out = new BufferedOutputStream(socket.getOutputStream());
     }
 
     @Override
@@ -42,6 +42,7 @@ public class GeneralCommandHandler implements Runnable {
                     .findAny()
                     .orElse(new DefaultCommandHandler())
                     .handle(array, out);
+                out.flush();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
