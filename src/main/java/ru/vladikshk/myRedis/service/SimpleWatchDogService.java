@@ -41,7 +41,7 @@ public class SimpleWatchDogService implements WatchdogService {
                     throw new RuntimeException(e);
                 }
             }
-        });
+        }).start();
     }
 
     @Override
