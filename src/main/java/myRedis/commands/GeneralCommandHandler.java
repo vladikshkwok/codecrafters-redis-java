@@ -35,7 +35,7 @@ public class GeneralCommandHandler implements Runnable {
                     array = Collections.emptyList();
                 }
 
-                if (array.size() < 1) continue;
+                if (array.isEmpty()) continue;
 
                 commandHandlers.stream()
                     .filter(commandHandler -> commandHandler.canHandle(array.getFirst()))
@@ -51,10 +51,10 @@ public class GeneralCommandHandler implements Runnable {
 
     public Object parseCommand() throws IOException {
         String command = in.readLine();
-        System.out.println("Received command: " + command);
         if (command == null || command.trim().isEmpty()) {
             return null;
         }
+        System.out.println("Received command: " + command);
 
         if (command.charAt(0) == '*') {
             return parseRedisArray(command);

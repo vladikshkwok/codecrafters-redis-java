@@ -33,7 +33,6 @@ public class SetCommandHandler implements CommandHandler {
         }
 
         print(out, new RBulkString("OK").getBytes());
-
     }
 
 }
