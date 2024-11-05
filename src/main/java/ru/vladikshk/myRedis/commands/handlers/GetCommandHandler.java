@@ -1,6 +1,7 @@
 package ru.vladikshk.myRedis.commands.handlers;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.vladikshk.myRedis.service.RDBFileStorageService;
 import ru.vladikshk.myRedis.service.SimpleStorageService;
 import ru.vladikshk.myRedis.service.StorageService;
 import ru.vladikshk.myRedis.types.RBulkString;
@@ -12,7 +13,7 @@ import static ru.vladikshk.myRedis.commands.handlers.CommandHandler.print;
 
 @Slf4j
 public class GetCommandHandler implements CommandHandler {
-    private final StorageService storageService = SimpleStorageService.getInstance();
+    private final StorageService storageService = RDBFileStorageService.getInstance();
 
     @Override
     public boolean canHandle(String command) {
@@ -27,5 +28,4 @@ public class GetCommandHandler implements CommandHandler {
         print(out, new RBulkString(value).getBytes());
         log.info("Got element={}:{} from storage", key, value);
     }
-
 }

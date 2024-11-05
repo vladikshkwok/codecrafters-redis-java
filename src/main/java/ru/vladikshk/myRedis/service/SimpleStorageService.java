@@ -44,6 +44,11 @@ public class SimpleStorageService implements StorageService {
     }
 
     @Override
+    public List<String> keys() {
+        return new ArrayList<>(storageMap.keySet());
+    }
+
+    @Override
     public void remove(String key) {
         storageMap.remove(key);
     }

@@ -16,7 +16,6 @@ import java.util.List;
 public class RedisCore {
     private static final RedisConfig redisConfig = RedisConfig.getInstance();
     private static final int PORT = 6379;
-    private static final StorageService storageService = SimpleStorageService.getInstance();
     private static final List<Socket> clientsSockets = new ArrayList<>();
 
     public static void startRedis(String[] args) {

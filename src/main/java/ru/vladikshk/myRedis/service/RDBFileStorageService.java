@@ -5,37 +5,72 @@ import lombok.extern.slf4j.Slf4j;
 import ru.vladikshk.myRedis.RedisConfig;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
-public class RDBFileReaderService implements FileReaderService {
+public class RDBFileStorageService implements StorageService {
     private static final int REDIS_HASH_TABLE_SECTION = 0xFB;
     private static final int EXPIRE_TIME_MILLIS = 0xFC;
     private static final int EXPIRE_TIME_SEC = 0xFD;
     private static final int REDIS_EOF = 0xFF;
-    private static volatile FileReaderService INSTANCE;
+
+    private static volatile StorageService INSTANCE;
     private final RedisConfig redisConfig = RedisConfig.getInstance();
 
-    public static synchronized FileReaderService getInstance() {
+    private final Map<String, String> storageMap;
+
+    private RDBFileStorageService() {
+        this.storageMap = new ConcurrentHashMap<>();
+        readRdbFile();
+    }
+
+    public static synchronized StorageService getInstance() {
         if (INSTANCE == null) {
             synchronized (SimpleStorageService.class) {
                 if (INSTANCE == null) {
-                    INSTANCE = new RDBFileReaderService();
+                    INSTANCE = new RDBFileStorageService();
                 }
             }
         }
         return INSTANCE;
     }
 
+    @Override
+    public void put(String key, String value) {
+        throw new RuntimeException("Not implemented yet");
+    }
+
+    @Override
+    public void put(String key, String value, int expireMs) {
+        throw new RuntimeException("Not implemented yet");
+    }
+
+    @Override
+    public void remove(String key) {
+        throw new RuntimeException("Not implemented yet");
+    }
+
+    @Override
+    public String get(String key) {
+        return storageMap.get(key);
+    }
+
     @SneakyThrows
     @Override
-    public List<String> readAllKeys() {
-        List<String> keys = new ArrayList<>();
+    public List<String> keys() {
+        return new ArrayList<>(storageMap.keySet());
+    }
+
+    @SneakyThrows
+    private void readRdbFile() {
         if (redisConfig.getDbFile() == null || !redisConfig.getDbFile().exists()) {
-            return keys;
+            return;
         }
 
         try (InputStream is = new FileInputStream(redisConfig.getDbFile())) {
@@ -57,16 +92,15 @@ public class RDBFileReaderService implements FileReaderService {
                 }
 
                 int keyLength = getLength(is);
-                byte[] keyBuff = new byte[keyLength];
-                is.read(keyBuff);
+                byte[] keyBuff = is.readNBytes(keyLength);
                 String key = new String(keyBuff);
                 log.info("Read key from dbFile: {}", key);
-                keys.add(key);
                 int valueLength = getLength(is);
-                is.readNBytes(valueLength); // skip value (for now)
+                byte[] valueBuff = is.readNBytes(valueLength);
+                String value = new String(valueBuff);
+                storageMap.put(key, value);
             }
         }
-        return keys;
     }
 
     @SneakyThrows
