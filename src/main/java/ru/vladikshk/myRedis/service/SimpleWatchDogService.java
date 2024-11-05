@@ -36,7 +36,7 @@ public class SimpleWatchDogService implements WatchdogService {
                     });
 
                 try {
-                    TimeUnit.MILLISECONDS.sleep(100);
+                    TimeUnit.MILLISECONDS.sleep(50);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }

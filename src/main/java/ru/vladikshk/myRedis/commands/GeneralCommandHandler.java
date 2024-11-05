@@ -31,15 +31,15 @@ public class GeneralCommandHandler implements Runnable {
     @Override
     public void run() {
         while (true) {
-            List<String> redisArray = parseInput();
+            List<String> inputArgs = parseInput();
 
-            if (redisArray.isEmpty()) continue;
+            if (inputArgs == null || inputArgs.isEmpty()) continue;
 
             commandHandlers.stream()
-                .filter(commandHandler -> commandHandler.canHandle(redisArray.getFirst()))
+                .filter(commandHandler -> commandHandler.canHandle(inputArgs.getFirst()))
                 .findAny()
                 .orElse(new DefaultCommandHandler())
-                .handle(redisArray, out);
+                .handle(inputArgs, out);
 
             out.flush();
         }
