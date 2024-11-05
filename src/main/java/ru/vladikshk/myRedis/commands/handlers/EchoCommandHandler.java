@@ -18,9 +18,9 @@ public class EchoCommandHandler implements CommandHandler {
 
     @Override
     public void handle(List<String> args, OutputStream out) {
-        RType echoArgs = new RBulkString(args.getFirst());
+        RType echoArgs = new RBulkString(args.getLast());
         print(out, echoArgs.getBytes());
-        log.info("ECHO: {}", args.getFirst());
+        log.info("ECHO: {}", echoArgs);
     }
 
 }
