@@ -36,7 +36,11 @@ public class SimpleWatchDogService implements WatchdogService {
                     });
 
                 try {
-                    TimeUnit.MILLISECONDS.sleep(50);
+                    if (storageExpireQueue.isEmpty()) {
+                        TimeUnit.MILLISECONDS.sleep(50);
+                    } else {
+                        TimeUnit.MILLISECONDS.sleep(20);
+                    }
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
