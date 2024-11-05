@@ -33,11 +33,7 @@ public class KeysCommandHandler implements CommandHandler {
         String keyPattern = args.get(1);
         List<String> keys = readerService.readAllKeys();
 
-        List<String> resultKeys = keys.stream()
-            .filter(key -> key.matches(keyPattern))
-            .toList();
-
-        print(out, new RArray(resultKeys).getBytes());
+        print(out, new RArray(keys).getBytes());
     }
 
 }
