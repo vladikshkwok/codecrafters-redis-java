@@ -15,8 +15,8 @@ import java.util.List;
 public class GeneralCommandHandler implements Runnable {
     private static final StorageService storageService = SimpleStorageService.getInstance();
     private static final List<CommandHandler> commandHandlers = List.of(
-        new PingCommandHandler(), new EchoCommandHandler(), new SetCommandHandler(storageService),
-        new GetCommandHandler(storageService), new ConfigCommandHandler()
+        new PingCommandHandler(), new EchoCommandHandler(), new SetCommandHandler(),
+        new GetCommandHandler(), new ConfigCommandHandler()
     );
 
     private BufferedReader in;

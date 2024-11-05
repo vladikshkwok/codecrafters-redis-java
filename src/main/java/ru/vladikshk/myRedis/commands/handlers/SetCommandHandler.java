@@ -1,6 +1,7 @@
 package ru.vladikshk.myRedis.commands.handlers;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.vladikshk.myRedis.service.SimpleStorageService;
 import ru.vladikshk.myRedis.service.StorageService;
 import ru.vladikshk.myRedis.types.RBulkString;
 
@@ -11,11 +12,7 @@ import static ru.vladikshk.myRedis.commands.handlers.CommandHandler.print;
 
 @Slf4j
 public class SetCommandHandler implements CommandHandler {
-    private final StorageService storageService;
-
-    public SetCommandHandler(StorageService storageService) {
-        this.storageService = storageService;
-    }
+    private final StorageService storageService = SimpleStorageService.getInstance();
 
     @Override
     public boolean canHandle(String command) {

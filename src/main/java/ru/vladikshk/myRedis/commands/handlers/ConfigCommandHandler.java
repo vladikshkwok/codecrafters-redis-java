@@ -16,8 +16,7 @@ import static ru.vladikshk.myRedis.commands.handlers.CommandHandler.print;
 
 @Slf4j
 public class ConfigCommandHandler implements CommandHandler {
-    private final StorageService storageService = SimpleStorageService.getInstance();
-    private final List<ConfigSubhandler> configSubHandlers = List.of(new ConfigGetCommandSubHandler(storageService));
+    private final List<ConfigSubhandler> configSubHandlers = List.of(new ConfigGetCommandSubHandler());
 
     @Override
     public boolean canHandle(String command) {

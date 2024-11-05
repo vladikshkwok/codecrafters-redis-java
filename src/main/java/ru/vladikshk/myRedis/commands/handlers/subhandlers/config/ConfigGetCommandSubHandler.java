@@ -3,6 +3,7 @@ package ru.vladikshk.myRedis.commands.handlers.subhandlers.config;
 import lombok.RequiredArgsConstructor;
 import ru.vladikshk.myRedis.commands.handlers.CommandHandler;
 import ru.vladikshk.myRedis.commands.handlers.ConfigCommandHandler;
+import ru.vladikshk.myRedis.service.SimpleStorageService;
 import ru.vladikshk.myRedis.service.StorageService;
 import ru.vladikshk.myRedis.types.RArray;
 
@@ -11,9 +12,8 @@ import java.util.List;
 
 import static ru.vladikshk.myRedis.commands.handlers.CommandHandler.print;
 
-@RequiredArgsConstructor
 public class ConfigGetCommandSubHandler implements ConfigSubhandler {
-    private final StorageService storageService;
+    private final StorageService storageService = SimpleStorageService.getInstance();
 
     @Override
     public boolean canHandle(String command) {
