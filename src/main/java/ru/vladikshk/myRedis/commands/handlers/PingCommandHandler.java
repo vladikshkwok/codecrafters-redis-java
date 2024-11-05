@@ -1,7 +1,7 @@
 package ru.vladikshk.myRedis.commands.handlers;
 
-import ru.vladikshk.myRedis.typeResolvers.types.RString;
-import ru.vladikshk.myRedis.typeResolvers.types.RType;
+import ru.vladikshk.myRedis.types.RString;
+import ru.vladikshk.myRedis.types.RType;
 
 import java.io.OutputStream;
 import java.util.List;

@@ -1,4 +1,4 @@
-package ru.vladikshk.myRedis.typeResolvers.types;
+package ru.vladikshk.myRedis.types;
 
 public abstract class RType {
     public byte[] getBytes() {

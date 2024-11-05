@@ -1,7 +1,7 @@
 package ru.vladikshk.myRedis.commands.handlers;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.vladikshk.myRedis.typeResolvers.types.RBulkString;
+import ru.vladikshk.myRedis.types.RBulkString;
 
 import java.io.OutputStream;
 import java.util.List;

@@ -3,13 +3,14 @@ package myRedis;
 
 import ru.vladikshk.myRedis.service.SimpleStorageService;
 import org.junit.Test;
+import ru.vladikshk.myRedis.service.StorageService;
 
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 
 public class SimpleStorageServiceTest {
-    private final SimpleStorageService storageService = new SimpleStorageService();
+    private final StorageService storageService = SimpleStorageService.getInstance();
 
     @Test
     public void TestPutWitExpiration() throws InterruptedException {

@@ -7,12 +7,24 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public class SimpleStorageService implements StorageService {
+    private static StorageService instance;
     private final Map<String, String> storageMap;
     private final WatchdogService watchdogService;
 
-    public SimpleStorageService() {
+    private SimpleStorageService() {
         this.storageMap = new ConcurrentHashMap<>();
         this.watchdogService = new SimpleWatchDogService(this);
+    }
+
+    public static synchronized StorageService getInstance() {
+        if (instance == null) {
+            synchronized (SimpleStorageService.class) {
+                if (instance == null) {
+                    instance = new SimpleStorageService();
+                }
+            }
+        }
+        return instance;
     }
 
     @Override

@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import ru.vladikshk.myRedis.service.SimpleStorageService;
 import ru.vladikshk.myRedis.commands.handlers.*;
+import ru.vladikshk.myRedis.service.StorageService;
 
 import java.io.*;
 import java.net.Socket;
@@ -12,10 +13,10 @@ import java.util.List;
 
 @Slf4j
 public class GeneralCommandHandler implements Runnable {
-    private static SimpleStorageService storageService = new SimpleStorageService();
-    private static List<CommandHandler> commandHandlers = List.of(
+    private static final StorageService storageService = SimpleStorageService.getInstance();
+    private static final List<CommandHandler> commandHandlers = List.of(
         new PingCommandHandler(), new EchoCommandHandler(), new SetCommandHandler(storageService),
-        new GetCommandHandler(storageService)
+        new GetCommandHandler(storageService), new ConfigCommandHandler()
     );
 
     private BufferedReader in;
@@ -58,15 +59,15 @@ public class GeneralCommandHandler implements Runnable {
             return List.of(parseRedisString(command));
         }
 
-        throw new IllegalArgumentException();
+        throw new IllegalArgumentException("Couldn't parse command");
     }
 
     private String parseRedisString(String command) throws IOException {
         int strlen = Integer.parseInt(command.substring(1));
-        log.info("Reading redis string with length: {}", strlen);
         String str = in.readLine();
+        log.info("Reading redis string={} with length={}", str, strlen);
         if (str.length() > strlen) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("String length differ with given length value");
         }
         return str;
     }

@@ -2,6 +2,8 @@ package ru.vladikshk.myRedis;
 
 import lombok.extern.slf4j.Slf4j;
 import ru.vladikshk.myRedis.commands.GeneralCommandHandler;
+import ru.vladikshk.myRedis.service.SimpleStorageService;
+import ru.vladikshk.myRedis.service.StorageService;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -11,9 +13,11 @@ import java.util.List;
 
 @Slf4j
 public class RedisCore {
+    static private final StorageService storageService = SimpleStorageService.getInstance();
     static List<Socket> clientsSockets = new ArrayList<>();
 
-    public static void startRedis() {
+    public static void startRedis(String[] args) {
+        handleArgs(args);
         int port = 6379;
         try (ServerSocket serverSocket = new ServerSocket(port);) {
             serverSocket.setReuseAddress(true);
@@ -45,6 +49,15 @@ public class RedisCore {
                 }
             } catch (IOException e) {
                 log.error("IOException: {}", e.getMessage(), e);
+            }
+        }
+    }
+
+    private static void handleArgs(String[] args) {
+        for (int i = 0; i < args.length; i+=2) {
+            if (args[i].startsWith("--")) {
+                storageService.put("config" + args[i], args[i+1]);
+                log.info("Saved {}={} into config", args[i], args[i+1]);
             }
         }
     }
