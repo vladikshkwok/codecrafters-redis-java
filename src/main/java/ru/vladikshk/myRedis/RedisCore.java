@@ -11,6 +11,10 @@ import java.net.Socket;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Slf4j
 public class RedisCore {
@@ -21,27 +25,24 @@ public class RedisCore {
     public static void startRedis(String[] args) {
         handleArgs(args);
         setDbFile();
+        ExecutorService executor = Executors.newCachedThreadPool();
 
         try (ServerSocket serverSocket = new ServerSocket(PORT);) {
             serverSocket.setReuseAddress(true);
             log.info("Binded on localhost:{}", PORT);
 
             while (true) {
-                waitForClients(serverSocket);
+                log.info("waiting for client connection...");
+                Socket clientSocket = serverSocket.accept();
+                clientsSockets.add(clientSocket);
+                log.info("client connected: {}", clientSocket.getInetAddress());
+                executor.submit(new GeneralCommandHandler(clientSocket));
             }
         } catch (IOException e) {
             log.error("IOException: {}", e.getMessage(), e);
         } finally {
             closeClientsSockets();
         }
-    }
-
-    private static void waitForClients(ServerSocket serverSocket) throws IOException {
-        log.info("waiting for client connection...");
-        Socket clientSocket = serverSocket.accept();
-        clientsSockets.add(clientSocket);
-        log.info("client connected: {}", clientSocket.getInetAddress());
-        new Thread(new GeneralCommandHandler(clientSocket)).start();
     }
 
     private static void closeClientsSockets() {
