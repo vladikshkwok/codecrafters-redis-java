@@ -34,6 +34,7 @@ public class KeysCommandHandler implements CommandHandler {
         List<String> keys = readerService.readAllKeys();
 
         print(out, new RArray(keys).getBytes());
+        log.info("Got keys from rdb file: {}", keys);
     }
 
 }
