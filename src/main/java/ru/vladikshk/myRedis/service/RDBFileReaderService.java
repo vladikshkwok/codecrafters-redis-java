@@ -1,6 +1,7 @@
 package ru.vladikshk.myRedis.service;
 
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import ru.vladikshk.myRedis.RedisConfig;
 
 import java.io.FileInputStream;
@@ -9,6 +10,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class RDBFileReaderService implements FileReaderService {
     private static final int REDIS_HASH_TABLE_SECTION = 0xFB;
     private static final int EXPIRE_TIME_MILLIS = 0xFC;
@@ -32,6 +34,10 @@ public class RDBFileReaderService implements FileReaderService {
     @Override
     public List<String> readAllKeys() {
         List<String> keys = new ArrayList<>();
+        if (redisConfig.getDbFile() == null || !redisConfig.getDbFile().exists()) {
+            return keys;
+        }
+
         try (InputStream is = new FileInputStream(redisConfig.getDbFile())) {
             int read;
             while ((read = is.read()) != -1) {
@@ -53,7 +59,9 @@ public class RDBFileReaderService implements FileReaderService {
                 int keyLength = getLength(is);
                 byte[] keyBuff = new byte[keyLength];
                 is.read(keyBuff);
-                keys.add(new String(keyBuff));
+                String key = new String(keyBuff);
+                log.info("Read key from dbFile: {}", key);
+                keys.add(key);
                 int valueLength = getLength(is);
                 is.readNBytes(valueLength); // skip value (for now)
             }
