@@ -8,20 +8,24 @@ import ru.vladikshk.myRedis.service.StorageService;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
 public class RedisCore {
-    static private final StorageService storageService = SimpleStorageService.getInstance();
-    static List<Socket> clientsSockets = new ArrayList<>();
+    private static final RedisConfig redisConfig = RedisConfig.getInstance();
+    private static final int PORT = 6379;
+    private static final StorageService storageService = SimpleStorageService.getInstance();
+    private static final List<Socket> clientsSockets = new ArrayList<>();
 
     public static void startRedis(String[] args) {
         handleArgs(args);
-        int port = 6379;
-        try (ServerSocket serverSocket = new ServerSocket(port);) {
+        setDbFile();
+
+        try (ServerSocket serverSocket = new ServerSocket(PORT);) {
             serverSocket.setReuseAddress(true);
-            log.info("Binded on localhost:{}", port);
+            log.info("Binded on localhost:{}", PORT);
 
             while (true) {
                 waitForClients(serverSocket);
@@ -54,11 +58,20 @@ public class RedisCore {
     }
 
     private static void handleArgs(String[] args) {
-        for (int i = 0; i < args.length; i+=2) {
+        for (int i = 0; i < args.length; i += 2) {
             if (args[i].startsWith("--")) {
-                storageService.put("config" + args[i], args[i+1]);
-                log.info("Saved {}={} into config", args[i], args[i+1]);
+                switch (args[i].substring(2)) {
+                    case "dir" -> redisConfig.setDir(args[i + 1]);
+                    case "dbfilename" -> redisConfig.setDbFileName(args[i + 1]);
+                }
+                log.info("Saved {}={} into config", args[i], args[i + 1]);
             }
+        }
+    }
+
+    private static void setDbFile() {
+        if (redisConfig.getDir() != null && redisConfig.getDbFileName() != null) {
+            redisConfig.setDbFile(Path.of(redisConfig.getDir()).resolve(redisConfig.getDbFileName()).toFile());
         }
     }
 }

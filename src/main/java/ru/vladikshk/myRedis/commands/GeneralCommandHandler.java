@@ -16,7 +16,7 @@ public class GeneralCommandHandler implements Runnable {
     private static final StorageService storageService = SimpleStorageService.getInstance();
     private static final List<CommandHandler> commandHandlers = List.of(
         new PingCommandHandler(), new EchoCommandHandler(), new SetCommandHandler(),
-        new GetCommandHandler(), new ConfigCommandHandler()
+        new GetCommandHandler(), new ConfigCommandHandler(), new KeysCommandHandler()
     );
 
     private BufferedReader in;

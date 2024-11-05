@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public class SimpleStorageService implements StorageService {
-    private static StorageService instance;
+    private static volatile StorageService INSTANCE;
     private final Map<String, String> storageMap;
     private final WatchdogService watchdogService;
 
@@ -17,14 +17,14 @@ public class SimpleStorageService implements StorageService {
     }
 
     public static synchronized StorageService getInstance() {
-        if (instance == null) {
+        if (INSTANCE == null) {
             synchronized (SimpleStorageService.class) {
-                if (instance == null) {
-                    instance = new SimpleStorageService();
+                if (INSTANCE == null) {
+                    INSTANCE = new SimpleStorageService();
                 }
             }
         }
-        return instance;
+        return INSTANCE;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package ru.vladikshk.myRedis.commands.handlers.subhandlers.config;
 
 import lombok.RequiredArgsConstructor;
+import ru.vladikshk.myRedis.RedisConfig;
 import ru.vladikshk.myRedis.commands.handlers.CommandHandler;
 import ru.vladikshk.myRedis.commands.handlers.ConfigCommandHandler;
 import ru.vladikshk.myRedis.service.SimpleStorageService;
@@ -13,7 +14,7 @@ import java.util.List;
 import static ru.vladikshk.myRedis.commands.handlers.CommandHandler.print;
 
 public class ConfigGetCommandSubHandler implements ConfigSubhandler {
-    private final StorageService storageService = SimpleStorageService.getInstance();
+    private final RedisConfig redisConfig = RedisConfig.getInstance();
 
     @Override
     public boolean canHandle(String command) {
@@ -23,7 +24,11 @@ public class ConfigGetCommandSubHandler implements ConfigSubhandler {
     @Override
     public void handle(List<String> args, OutputStream out) {
         String key = args.get(2);
-        String result = storageService.get("config--" + key);
+        String result = switch (key) {
+            case "dir" -> redisConfig.getDir();
+            case "dbfilename" -> redisConfig.getDbFileName();
+            case null, default -> "Unknown config key: " + key;
+        };
 
         print(out, new RArray(List.of(key, result)).getBytes());
     }
