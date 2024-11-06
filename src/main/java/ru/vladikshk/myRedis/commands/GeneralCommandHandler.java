@@ -1,7 +1,10 @@
 package ru.vladikshk.myRedis.commands;
 
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import ru.vladikshk.myRedis.RedisConfig;
+import ru.vladikshk.myRedis.commands.handlers.subhandlers.config.ConfigGetCommandSubHandler;
 import ru.vladikshk.myRedis.service.SimpleStorageService;
 import ru.vladikshk.myRedis.commands.handlers.*;
 import ru.vladikshk.myRedis.service.StorageService;
@@ -13,17 +16,19 @@ import java.util.List;
 
 @Slf4j
 public class GeneralCommandHandler implements Runnable {
-    private static final List<CommandHandler> commandHandlers = List.of(
-        new PingCommandHandler(), new EchoCommandHandler(), new SetCommandHandler(),
-        new GetCommandHandler(), new ConfigCommandHandler(), new KeysCommandHandler()
-    );
+    private final List<CommandHandler> commandHandlers;
 
-    private BufferedReader in;
-    private OutputStream out;
+    private final BufferedReader in;
+    private final OutputStream out;
 
-    public GeneralCommandHandler(Socket socket) throws IOException {
+    public GeneralCommandHandler(StorageService storageService, RedisConfig redisConfig, Socket socket) throws IOException {
         this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         this.out = new BufferedOutputStream(socket.getOutputStream());
+        this.commandHandlers = List.of(
+            new PingCommandHandler(), new EchoCommandHandler(), new SetCommandHandler(storageService),
+            new GetCommandHandler(storageService), new ConfigCommandHandler(List.of(new ConfigGetCommandSubHandler(redisConfig))),
+            new KeysCommandHandler(storageService)
+        );
     }
 
     @SneakyThrows
