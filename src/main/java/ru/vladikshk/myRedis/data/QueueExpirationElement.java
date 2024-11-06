@@ -1,4 +1,4 @@
-package ru.vladikshk.myRedis.service;
+package ru.vladikshk.myRedis.data;
 
 import lombok.Getter;
 

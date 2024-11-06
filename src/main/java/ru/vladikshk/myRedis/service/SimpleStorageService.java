@@ -33,7 +33,7 @@ public class SimpleStorageService implements StorageService {
     }
 
     @Override
-    public void put(String key, String value, int expireMs) {
+    public void put(String key, String value, Long expireMs) {
         storageMap.put(key, value);
         watchdogService.addForWatch(key, expireMs);
     }

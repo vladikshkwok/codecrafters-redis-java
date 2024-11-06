@@ -2,7 +2,6 @@ package ru.vladikshk.myRedis.commands.handlers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import ru.vladikshk.myRedis.service.SimpleStorageService;
 import ru.vladikshk.myRedis.service.StorageService;
 import ru.vladikshk.myRedis.types.RBulkString;
 
@@ -27,7 +26,7 @@ public class SetCommandHandler implements CommandHandler {
         String value = args.get(2);
 
         if (args.size() > 3) {
-            int expireMs = Integer.parseInt(args.get(4));
+            Long expireMs = Integer.parseInt(args.get(4));
             storageService.put(key, value, expireMs);
             log.info("Set element {}:{} with expiration in {} ms", key, value, expireMs);
         } else {

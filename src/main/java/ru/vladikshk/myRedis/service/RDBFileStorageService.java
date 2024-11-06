@@ -5,9 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import ru.vladikshk.myRedis.RedisConfig;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -24,9 +25,11 @@ public class RDBFileStorageService implements StorageService {
     private final RedisConfig redisConfig = RedisConfig.getInstance();
 
     private final Map<String, String> storageMap;
+    private final WatchdogService watchdogService;
 
     private RDBFileStorageService() {
         this.storageMap = new ConcurrentHashMap<>();
+        this.watchdogService = new SimpleWatchDogService(this);
         readRdbFile();
     }
 
@@ -43,12 +46,20 @@ public class RDBFileStorageService implements StorageService {
 
     @Override
     public void put(String key, String value) {
-        throw new RuntimeException("Not implemented yet");
+        storageMap.put(key, value);
     }
 
     @Override
-    public void put(String key, String value, int expireMs) {
-        throw new RuntimeException("Not implemented yet");
+    public void put(String key, String value, Long expireMs) {
+        if (expireMs == null) {
+            put(key, value);
+            return;
+        }
+        if (expireMs <= 0) {
+            return;
+        }
+        this.put(key, value);
+        watchdogService.addForWatch(key, expireMs);
     }
 
     @Override
@@ -85,13 +96,16 @@ public class RDBFileStorageService implements StorageService {
 
             int b;
             while ((b = is.read()) != -1 && b != REDIS_EOF) {
+                Long expireMs = null;
                 if (b == EXPIRE_TIME_MILLIS) {
                     log.info("Skip 8 bytes (not need read expiration timestamp)");
-                    is.readNBytes(8); // skip expiration timestamp (not needed now)
+                    long timeStamp = ByteBuffer.wrap(is.readNBytes(8)).getLong();
+                    expireMs = ChronoUnit.MILLIS.between(Instant.ofEpochMilli(timeStamp), Instant.now());
                     is.read(); // skip 1 byte (type)
                 } else if (b == EXPIRE_TIME_SEC) {
                     log.info("Skip 4 bytes (not need read expiration timestamp)");
-                    is.readNBytes(4); // skip expiration timestamp (not needed now)
+                    long timeStamp = ByteBuffer.wrap(is.readNBytes(4)).getInt();
+                    expireMs = ChronoUnit.MILLIS.between(Instant.ofEpochMilli(timeStamp), Instant.now());
                     is.read(); // skip 1 byte (type)
                 }
 
@@ -102,7 +116,7 @@ public class RDBFileStorageService implements StorageService {
                 int valueLength = getLength(is);
                 byte[] valueBuff = is.readNBytes(valueLength);
                 String value = new String(valueBuff);
-                storageMap.put(key, value);
+                this.put(key, value, expireMs);
             }
         }
     }
