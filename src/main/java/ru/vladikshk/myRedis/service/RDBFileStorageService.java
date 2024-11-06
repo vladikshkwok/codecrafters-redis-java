@@ -98,14 +98,14 @@ public class RDBFileStorageService implements StorageService {
             while ((b = is.read()) != -1 && b != REDIS_EOF) {
                 Long expireMs = null;
                 if (b == EXPIRE_TIME_MILLIS) {
-                    log.info("Skip 8 bytes (not need read expiration timestamp)");
                     long timeStamp = ByteBuffer.wrap(is.readNBytes(8)).getLong();
-                    expireMs = ChronoUnit.MILLIS.between(Instant.ofEpochMilli(timeStamp), Instant.now());
+                    expireMs = ChronoUnit.MILLIS.between(Instant.now(), Instant.ofEpochMilli(timeStamp));
+                    log.info("Read expiration timestamp in millis {}. Diff {}", timeStamp, expireMs);
                     is.read(); // skip 1 byte (type)
                 } else if (b == EXPIRE_TIME_SEC) {
-                    log.info("Skip 4 bytes (not need read expiration timestamp)");
                     long timeStamp = ByteBuffer.wrap(is.readNBytes(4)).getInt();
-                    expireMs = ChronoUnit.MILLIS.between(Instant.ofEpochMilli(timeStamp), Instant.now());
+                    expireMs = ChronoUnit.MILLIS.between(Instant.now(), Instant.ofEpochMilli(timeStamp));
+                    log.info("Read expiration timestamp in seconds {}. Diff {}", timeStamp, expireMs);
                     is.read(); // skip 1 byte (type)
                 }
 
