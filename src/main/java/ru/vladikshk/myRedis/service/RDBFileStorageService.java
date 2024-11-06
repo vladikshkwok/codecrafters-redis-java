@@ -86,9 +86,13 @@ public class RDBFileStorageService implements StorageService {
             int b;
             while ((b = is.read()) != -1 && b != REDIS_EOF) {
                 if (b == EXPIRE_TIME_MILLIS) {
+                    log.info("Skip 8 bytes (not need read expiration timestamp)");
                     is.readNBytes(8); // skip expiration timestamp (not needed now)
+                    is.read(); // skip 1 byte (type)
                 } else if (b == EXPIRE_TIME_SEC) {
+                    log.info("Skip 4 bytes (not need read expiration timestamp)");
                     is.readNBytes(4); // skip expiration timestamp (not needed now)
+                    is.read(); // skip 1 byte (type)
                 }
 
                 int keyLength = getLength(is);

@@ -27,7 +27,8 @@ public class RedisCore {
     public static void startRedis(String[] args) {
         handleArgs(args);
         setDbFile();
-        storageService = getStorageService();
+        setStorageService();
+
         ExecutorService executor = Executors.newCachedThreadPool();
 
         try (ServerSocket serverSocket = new ServerSocket(PORT);) {
@@ -48,8 +49,9 @@ public class RedisCore {
         }
     }
 
-    private static StorageService getStorageService() {
-        return dbFileExists() ? RDBFileStorageService.getInstance() : SimpleStorageService.getInstance();
+    private static void setStorageService() {
+        storageService = dbFileExists() ? RDBFileStorageService.getInstance() : SimpleStorageService.getInstance();
+        log.info("Using {} as storage service", storageService.getClass().getSimpleName());
     }
 
     private static Boolean dbFileExists() {
