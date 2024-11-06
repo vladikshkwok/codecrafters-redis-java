@@ -7,6 +7,7 @@ import ru.vladikshk.myRedis.RedisConfig;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -98,12 +99,16 @@ public class RDBFileStorageService implements StorageService {
             while ((b = is.read()) != -1 && b != REDIS_EOF) {
                 Long expireMs = null;
                 if (b == EXPIRE_TIME_MILLIS) {
-                    long timeStamp = ByteBuffer.wrap(is.readNBytes(8)).getLong();
+                    ByteBuffer buffer = ByteBuffer.wrap(is.readNBytes(8));
+                    buffer.order(ByteOrder.LITTLE_ENDIAN);
+                    long timeStamp = buffer.getLong();
                     expireMs = ChronoUnit.MILLIS.between(Instant.now(), Instant.ofEpochMilli(timeStamp));
                     log.info("Read expiration timestamp in millis {}. Diff {}", timeStamp, expireMs);
                     is.read(); // skip 1 byte (type)
                 } else if (b == EXPIRE_TIME_SEC) {
-                    long timeStamp = ByteBuffer.wrap(is.readNBytes(4)).getInt();
+                    ByteBuffer buffer = ByteBuffer.wrap(is.readNBytes(4));
+                    buffer.order(ByteOrder.LITTLE_ENDIAN);
+                    long timeStamp = buffer.getInt();
                     expireMs = ChronoUnit.MILLIS.between(Instant.now(), Instant.ofEpochMilli(timeStamp));
                     log.info("Read expiration timestamp in seconds {}. Diff {}", timeStamp, expireMs);
                     is.read(); // skip 1 byte (type)
