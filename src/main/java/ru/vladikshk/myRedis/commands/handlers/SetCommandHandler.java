@@ -26,7 +26,7 @@ public class SetCommandHandler implements CommandHandler {
         String value = args.get(2);
 
         if (args.size() > 3) {
-            Long expireMs = Integer.parseInt(args.get(4));
+            Long expireMs = Long.parseLong(args.get(4));
             storageService.put(key, value, expireMs);
             log.info("Set element {}:{} with expiration in {} ms", key, value, expireMs);
         } else {
