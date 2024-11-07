@@ -15,8 +15,9 @@ import java.util.List;
 import static ru.vladikshk.myRedis.commands.handlers.CommandHandler.print;
 
 @Slf4j
+@RequiredArgsConstructor
 public class ConfigCommandHandler implements CommandHandler {
-    private final List<ConfigSubhandler> configSubHandlers = List.of(new ConfigGetCommandSubHandler());
+    private final List<ConfigSubhandler> configSubHandlers;
 
     @Override
     public boolean canHandle(String command) {

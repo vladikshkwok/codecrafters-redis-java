@@ -14,7 +14,7 @@ public class SimpleStorageServiceTest {
 
     @Test
     public void TestPutWitExpiration() throws InterruptedException {
-        storageService.put("key", "value", 500);
+        storageService.put("key", "value", 500L);
         assertEquals("value", storageService.get("key"));
         TimeUnit.MILLISECONDS.sleep(600);
         assertNull(storageService.get("key"));

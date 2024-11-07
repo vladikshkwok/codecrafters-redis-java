@@ -1,5 +1,6 @@
 package ru.vladikshk.myRedis.commands.handlers;
 
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import ru.vladikshk.myRedis.service.RDBFileStorageService;
@@ -12,8 +13,9 @@ import java.util.List;
 import static ru.vladikshk.myRedis.commands.handlers.CommandHandler.print;
 
 @Slf4j
+@RequiredArgsConstructor
 public class KeysCommandHandler implements CommandHandler {
-    private final StorageService readerService = RDBFileStorageService.getInstance();
+    private final StorageService readerService;
 
     @Override
     public boolean canHandle(String command) {

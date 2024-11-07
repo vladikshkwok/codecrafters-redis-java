@@ -1,6 +1,7 @@
 package ru.vladikshk.myRedis.service;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.vladikshk.myRedis.data.QueueExpirationElement;
 
 import java.time.Instant;
 import java.util.Comparator;
@@ -49,7 +50,7 @@ public class SimpleWatchDogService implements WatchdogService {
     }
 
     @Override
-    public void addForWatch(String key, int millisToExpire) {
+    public void addForWatch(String key, long millisToExpire) {
         QueueExpirationElement newElement = new QueueExpirationElement(Instant.now().plusMillis(millisToExpire), key);
         storageExpireQueue.add(newElement);
         log.info("Added new element to watch: {}", newElement);
