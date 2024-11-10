@@ -81,10 +81,10 @@ public class RedisCore {
     }
 
     private static void setDbFile() {
-        String dir = redisConfig.getParam("dir");
-        String dbFileName = redisConfig.getParam("dbfilename");
-        if (dir != null && dbFileName != null) {
-            redisConfig.setDbFile(Path.of(dir).resolve(dbFileName).toFile());
+        var dir = redisConfig.getParam("dir");
+        var dbFileName = redisConfig.getParam("dbfilename");
+        if (dir.isPresent() && dbFileName.isPresent()) {
+            redisConfig.setDbFile(Path.of(dir.get()).resolve(dbFileName.get()).toFile());
         }
     }
 }

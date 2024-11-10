@@ -24,8 +24,8 @@ public class RedisConfig {
         configMap.put(key, value);
     }
 
-    public String getParam(String key) {
-        return configMap.get(key);
+    public Optional<String> getParam(String key) {
+        return Optional.ofNullable(configMap.get(key));
     }
 
     public Optional<Integer> getPort() {

@@ -6,6 +6,8 @@ import ru.vladikshk.myRedis.types.RArray;
 
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Optional;
+import java.util.Spliterator;
 
 import static ru.vladikshk.myRedis.commands.handlers.CommandHandler.print;
 
@@ -21,11 +23,8 @@ public class ConfigGetCommandSubHandler implements ConfigSubhandler {
     @Override
     public void handle(List<String> args, OutputStream out) {
         String key = args.get(2);
-        String result = switch (key) {
-            case "dir" -> redisConfig.getDir();
-            case "dbfilename" -> redisConfig.getDbFileName();
-            case null, default -> "Unknown config key: " + key;
-        };
+        String result = redisConfig.getParam(key)
+            .orElse("Unknown config parameter");
 
         print(out, new RArray(List.of(key, result)).getBytes());
     }
