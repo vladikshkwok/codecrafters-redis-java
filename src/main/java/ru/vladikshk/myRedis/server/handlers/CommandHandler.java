@@ -8,6 +8,7 @@ public interface CommandHandler {
     static void print(OutputStream out, byte[] bytes) {
         try {
             out.write(bytes);
+            out.flush();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

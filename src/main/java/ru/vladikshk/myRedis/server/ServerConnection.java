@@ -47,8 +47,6 @@ public class ServerConnection implements Runnable {
                 .findAny()
                 .orElse(new DefaultCommandHandler())
                 .handle(inputArgs, out);
-
-            out.flush();
         }
     }
 
