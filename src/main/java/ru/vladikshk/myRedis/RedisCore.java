@@ -1,7 +1,7 @@
 package ru.vladikshk.myRedis;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.vladikshk.myRedis.commands.GeneralCommandHandler;
+import ru.vladikshk.myRedis.commands.ClientHandler;
 import ru.vladikshk.myRedis.service.RDBFileStorageService;
 import ru.vladikshk.myRedis.service.SimpleStorageService;
 import ru.vladikshk.myRedis.service.StorageService;
@@ -30,7 +30,7 @@ public class RedisCore {
         setStorageService();
 
         ExecutorService executor = Executors.newCachedThreadPool();
-
+        System.out.println(redisConfig.getPort().orElse(DEFAULT_PORT));
         try (ServerSocket serverSocket = new ServerSocket(redisConfig.getPort().orElse(DEFAULT_PORT));) {
             serverSocket.setReuseAddress(true);
             log.info("Binded on localhost:{}", serverSocket.getLocalPort());
@@ -40,7 +40,7 @@ public class RedisCore {
                 Socket clientSocket = serverSocket.accept();
                 clientsSockets.add(clientSocket);
                 log.info("client connected: {}", clientSocket.getInetAddress());
-                executor.submit(new GeneralCommandHandler(storageService, redisConfig, clientSocket));
+                executor.submit(new ClientHandler(storageService, redisConfig, clientSocket));
             }
         } catch (IOException e) {
             log.error("IOException: {}", e.getMessage(), e);
