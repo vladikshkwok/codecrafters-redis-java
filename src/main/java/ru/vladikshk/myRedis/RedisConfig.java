@@ -1,23 +1,37 @@
 package ru.vladikshk.myRedis;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import lombok.experimental.UtilityClass;
 import ru.vladikshk.myRedis.service.SimpleStorageService;
-import ru.vladikshk.myRedis.service.StorageService;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 @Getter
 @Setter
 public class RedisConfig {
     private static volatile RedisConfig INSTANCE;
-    private String dir;
-    private String dbFileName;
+    private final Map<String, String> configMap;
     private File dbFile;
 
-    private RedisConfig() {}
+    private RedisConfig() {
+        this.configMap = new HashMap<>();
+    }
+
+    public void addParam(String key, String value) {
+        configMap.put(key, value);
+    }
+
+    public String getParam(String key) {
+        return configMap.get(key);
+    }
+
+    public Optional<Integer> getPort() {
+        return Optional.ofNullable(configMap.get("port"))
+            .map(Integer::parseInt);
+    }
 
     public static synchronized RedisConfig getInstance() {
         if (INSTANCE == null) {

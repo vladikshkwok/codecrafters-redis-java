@@ -21,7 +21,7 @@ import java.util.concurrent.Executors;
 public class RedisCore {
     private static final RedisConfig redisConfig = RedisConfig.getInstance();
     private static StorageService storageService;
-    private static final int PORT = 6379;
+    private static int DEFAULT_PORT = 6379;
     private static final List<Socket> clientsSockets = new ArrayList<>();
 
     public static void startRedis(String[] args) {
@@ -31,9 +31,9 @@ public class RedisCore {
 
         ExecutorService executor = Executors.newCachedThreadPool();
 
-        try (ServerSocket serverSocket = new ServerSocket(PORT);) {
+        try (ServerSocket serverSocket = new ServerSocket(redisConfig.getPort().orElse(DEFAULT_PORT));) {
             serverSocket.setReuseAddress(true);
-            log.info("Binded on localhost:{}", PORT);
+            log.info("Binded on localhost:{}", serverSocket.getLocalPort());
 
             while (true) {
                 log.info("waiting for client connection...");
@@ -73,18 +73,18 @@ public class RedisCore {
     private static void handleArgs(String[] args) {
         for (int i = 0; i < args.length; i += 2) {
             if (args[i].startsWith("--")) {
-                switch (args[i].substring(2)) {
-                    case "dir" -> redisConfig.setDir(args[i + 1]);
-                    case "dbfilename" -> redisConfig.setDbFileName(args[i + 1]);
-                }
+                redisConfig.addParam(args[i].substring(2), args[i + 1]);
+
                 log.info("Saved {}={} into config", args[i], args[i + 1]);
             }
         }
     }
 
     private static void setDbFile() {
-        if (redisConfig.getDir() != null && redisConfig.getDbFileName() != null) {
-            redisConfig.setDbFile(Path.of(redisConfig.getDir()).resolve(redisConfig.getDbFileName()).toFile());
+        String dir = redisConfig.getParam("dir");
+        String dbFileName = redisConfig.getParam("dbfilename");
+        if (dir != null && dbFileName != null) {
+            redisConfig.setDbFile(Path.of(dir).resolve(dbFileName).toFile());
         }
     }
 }
