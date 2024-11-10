@@ -38,9 +38,13 @@ public class RedisConfig {
     }
 
     public RedisRole getRole() {
-        return getParam("replicaof")
+        return getReplicaOf()
             .map(_ -> SLAVE)
             .orElse(MASTER);
+    }
+
+    public Optional<String> getReplicaOf() {
+        return getParam("replicaof");
     }
 
     public String getReplicationInfo() {

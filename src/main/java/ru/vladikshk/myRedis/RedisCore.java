@@ -2,9 +2,7 @@ package ru.vladikshk.myRedis;
 
 import lombok.extern.slf4j.Slf4j;
 import ru.vladikshk.myRedis.commands.ClientHandler;
-import ru.vladikshk.myRedis.service.RDBFileStorageService;
-import ru.vladikshk.myRedis.service.SimpleStorageService;
-import ru.vladikshk.myRedis.service.StorageService;
+import ru.vladikshk.myRedis.service.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,9 +15,12 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static ru.vladikshk.myRedis.data.RedisRole.MASTER;
+
 @Slf4j
 public class RedisCore {
     private static final RedisConfig redisConfig = RedisConfig.getInstance();
+    private static final ReplicationService replicationService = SimpleReplicationService.getInstance();
     private static StorageService storageService;
     private static int DEFAULT_PORT = 6379;
     private static final List<Socket> clientsSockets = new ArrayList<>();
@@ -28,6 +29,7 @@ public class RedisCore {
         handleArgs(args);
         setDbFile();
         setStorageService();
+        connectIfReplica();
 
         ExecutorService executor = Executors.newCachedThreadPool();
         System.out.println(redisConfig.getPort().orElse(DEFAULT_PORT));
@@ -47,6 +49,18 @@ public class RedisCore {
         } finally {
             closeClientsSockets();
         }
+    }
+
+    private static void connectIfReplica() {
+        if (MASTER.equals(redisConfig.getRole())) {
+            return;
+        }
+
+        String[] connectionInfo = redisConfig.getReplicaOf()
+            .map(s -> s.split(" "))
+            .orElseThrow(IllegalStateException::new);
+
+        replicationService.connect(connectionInfo[0], Integer.parseInt(connectionInfo[1]));
     }
 
     private static void setStorageService() {
