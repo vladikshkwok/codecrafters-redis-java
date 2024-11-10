@@ -25,8 +25,10 @@ public class ClientHandler implements Runnable {
         this.out = new BufferedOutputStream(socket.getOutputStream());
         this.commandHandlers = List.of(
             new PingCommandHandler(), new EchoCommandHandler(), new SetCommandHandler(storageService),
-            new GetCommandHandler(storageService), new ConfigCommandHandler(List.of(new ConfigGetCommandSubHandler(redisConfig))),
-            new KeysCommandHandler(storageService), new InfoCommandHandler(List.of(new ReplicationInfoSubhandler()))
+            new GetCommandHandler(storageService),
+            new ConfigCommandHandler(List.of(new ConfigGetCommandSubHandler(redisConfig))),
+            new KeysCommandHandler(storageService),
+            new InfoCommandHandler(List.of(new ReplicationInfoSubhandler(redisConfig)))
         );
     }
 

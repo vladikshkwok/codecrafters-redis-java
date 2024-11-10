@@ -20,7 +20,7 @@ public class InfoCommandHandler implements CommandHandler {
 
     @Override
     public void handle(List<String> args, OutputStream out) {
-        log.info("Using config handler");
+        log.info("Using info handler");
         infoSubHandlers.stream()
             .filter(sub -> sub.canHandle(args.get(1)))
             .findAny()

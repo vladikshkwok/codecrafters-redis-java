@@ -2,12 +2,16 @@ package ru.vladikshk.myRedis;
 
 import lombok.Getter;
 import lombok.Setter;
+import ru.vladikshk.myRedis.data.RedisRole;
 import ru.vladikshk.myRedis.service.SimpleStorageService;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import static ru.vladikshk.myRedis.data.RedisRole.MASTER;
+import static ru.vladikshk.myRedis.data.RedisRole.SLAVE;
 
 @Getter
 @Setter
@@ -31,6 +35,12 @@ public class RedisConfig {
     public Optional<Integer> getPort() {
         return Optional.ofNullable(configMap.get("port"))
             .map(Integer::parseInt);
+    }
+
+    public RedisRole getRole() {
+        return getParam("replicaof")
+            .map(_ -> SLAVE)
+            .orElse(MASTER);
     }
 
     public static synchronized RedisConfig getInstance() {
