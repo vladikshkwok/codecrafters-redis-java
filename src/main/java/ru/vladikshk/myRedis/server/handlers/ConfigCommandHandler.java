@@ -1,18 +1,11 @@
-package ru.vladikshk.myRedis.commands.handlers;
+package ru.vladikshk.myRedis.server.handlers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import ru.vladikshk.myRedis.commands.handlers.subhandlers.config.ConfigGetCommandSubHandler;
-import ru.vladikshk.myRedis.commands.handlers.subhandlers.config.ConfigSubhandler;
-import ru.vladikshk.myRedis.service.SimpleStorageService;
-import ru.vladikshk.myRedis.service.StorageService;
-import ru.vladikshk.myRedis.types.RBulkString;
+import ru.vladikshk.myRedis.server.handlers.subhandlers.config.ConfigSubhandler;
 
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.List;
-
-import static ru.vladikshk.myRedis.commands.handlers.CommandHandler.print;
 
 @Slf4j
 @RequiredArgsConstructor

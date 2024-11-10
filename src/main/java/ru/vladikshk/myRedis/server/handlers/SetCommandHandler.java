@@ -1,4 +1,4 @@
-package ru.vladikshk.myRedis.commands.handlers;
+package ru.vladikshk.myRedis.server.handlers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,7 +8,7 @@ import ru.vladikshk.myRedis.types.RBulkString;
 import java.io.OutputStream;
 import java.util.List;
 
-import static ru.vladikshk.myRedis.commands.handlers.CommandHandler.print;
+import static ru.vladikshk.myRedis.server.handlers.CommandHandler.print;
 
 @Slf4j
 @RequiredArgsConstructor

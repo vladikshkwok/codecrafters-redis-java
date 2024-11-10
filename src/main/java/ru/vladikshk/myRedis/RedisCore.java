@@ -1,7 +1,7 @@
 package ru.vladikshk.myRedis;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.vladikshk.myRedis.server.ClientHandler;
+import ru.vladikshk.myRedis.server.ServerConnection;
 import ru.vladikshk.myRedis.service.*;
 
 import java.io.File;
@@ -41,7 +41,7 @@ public class RedisCore {
                 Socket clientSocket = serverSocket.accept();
                 clientsSockets.add(clientSocket);
                 log.info("client connected: {}", clientSocket.getInetAddress());
-                executor.submit(new ClientHandler(storageService, redisConfig, clientSocket));
+                executor.submit(new ServerConnection(storageService, redisConfig, clientSocket));
             }
         } catch (IOException e) {
             log.error("IOException: {}", e.getMessage(), e);

@@ -3,9 +3,9 @@ package ru.vladikshk.myRedis.server;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import ru.vladikshk.myRedis.RedisConfig;
-import ru.vladikshk.myRedis.commands.handlers.subhandlers.config.ConfigGetCommandSubHandler;
-import ru.vladikshk.myRedis.commands.handlers.*;
-import ru.vladikshk.myRedis.commands.handlers.subhandlers.info.ReplicationInfoSubhandler;
+import ru.vladikshk.myRedis.server.handlers.*;
+import ru.vladikshk.myRedis.server.handlers.subhandlers.config.ConfigGetCommandSubHandler;
+import ru.vladikshk.myRedis.server.handlers.subhandlers.info.ReplicationInfoSubhandler;
 import ru.vladikshk.myRedis.service.StorageService;
 
 import java.io.*;
@@ -14,13 +14,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-public class ClientHandler implements Runnable {
+public class ServerConnection implements Runnable {
     private final List<CommandHandler> commandHandlers;
 
     private final BufferedReader in;
     private final OutputStream out;
 
-    public ClientHandler(StorageService storageService, RedisConfig redisConfig, Socket socket) throws IOException {
+    public ServerConnection(StorageService storageService, RedisConfig redisConfig, Socket socket) throws IOException {
         this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         this.out = new BufferedOutputStream(socket.getOutputStream());
         this.commandHandlers = List.of(
@@ -29,7 +29,8 @@ public class ClientHandler implements Runnable {
             new ConfigCommandHandler(List.of(new ConfigGetCommandSubHandler(redisConfig))),
             new KeysCommandHandler(storageService),
             new InfoCommandHandler(List.of(new ReplicationInfoSubhandler(redisConfig))),
-            new ReplConfCommandHandler()
+            new ReplConfCommandHandler(),
+            new PsyncCommandHandler()
         );
     }
 

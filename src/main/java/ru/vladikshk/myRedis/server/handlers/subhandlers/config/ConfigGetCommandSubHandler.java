@@ -1,15 +1,12 @@
-package ru.vladikshk.myRedis.commands.handlers.subhandlers.config;
+package ru.vladikshk.myRedis.server.handlers.subhandlers.config;
 
 import lombok.RequiredArgsConstructor;
 import ru.vladikshk.myRedis.RedisConfig;
+import ru.vladikshk.myRedis.server.handlers.CommandHandler;
 import ru.vladikshk.myRedis.types.RArray;
 
 import java.io.OutputStream;
 import java.util.List;
-import java.util.Optional;
-import java.util.Spliterator;
-
-import static ru.vladikshk.myRedis.commands.handlers.CommandHandler.print;
 
 @RequiredArgsConstructor
 public class ConfigGetCommandSubHandler implements ConfigSubhandler {
@@ -26,6 +23,6 @@ public class ConfigGetCommandSubHandler implements ConfigSubhandler {
         String result = redisConfig.getParam(key)
             .orElse("Unknown config parameter");
 
-        print(out, new RArray(List.of(key, result)).getBytes());
+        CommandHandler.print(out, new RArray(List.of(key, result)).getBytes());
     }
 }

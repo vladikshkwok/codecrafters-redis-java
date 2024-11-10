@@ -50,18 +50,18 @@ public class SimpleReplicationService implements ReplicationService {
         log.info("Sending ping to master redis");
         out.write(new RArray(List.of("PING")).getBytes());
         out.flush();
-        in.readLine();
+        log.info("response: {}", in.readLine());
         log.info("Sending replconf to master redis with listening port");
         out.write(new RArray(List.of("REPLCONF", "listening-port", redisConfig.getPort().toString())).getBytes());
         out.flush();
-        in.readLine();
+        log.info("response: {}", in.readLine());
         log.info("Sending replconf to master redis with capabilities");
         out.write(new RArray(List.of("REPLCONF", "capa", "sync")).getBytes());
         out.flush();
-        in.readLine();
+        log.info("response: {}", in.readLine());
         log.info("Sending psync to master redis");
         out.write(new RArray(List.of("PSYNC", "?", "-1")).getBytes());
         out.flush();
-        in.readLine();
+        log.info("response: {}", in.readLine());
     }
 }

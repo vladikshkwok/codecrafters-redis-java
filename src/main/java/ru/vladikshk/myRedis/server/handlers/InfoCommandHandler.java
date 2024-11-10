@@ -1,9 +1,8 @@
-package ru.vladikshk.myRedis.commands.handlers;
+package ru.vladikshk.myRedis.server.handlers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import ru.vladikshk.myRedis.commands.handlers.subhandlers.config.ConfigSubhandler;
-import ru.vladikshk.myRedis.commands.handlers.subhandlers.info.InfoSubhandler;
+import ru.vladikshk.myRedis.server.handlers.subhandlers.info.InfoSubhandler;
 
 import java.io.OutputStream;
 import java.util.List;
