@@ -21,6 +21,6 @@ public class ReplicationInfoSubhandler implements InfoSubhandler {
 
     @Override
     public void handle(List<String> args, OutputStream out) {
-        print(out, new RBulkString("role:" + redisConfig.getRole()).getBytes());
+        print(out, new RBulkString(redisConfig.getReplicationInfo()).getBytes());
     }
 }

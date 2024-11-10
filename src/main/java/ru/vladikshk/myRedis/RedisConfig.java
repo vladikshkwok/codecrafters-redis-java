@@ -43,6 +43,20 @@ public class RedisConfig {
             .orElse(MASTER);
     }
 
+    public String getReplicationInfo() {
+        StringBuilder sb = new StringBuilder();
+        RedisRole role = getRole();
+        sb.append("role:").append(role).append("\r\n");
+        switch (role) {
+            case MASTER -> {
+                sb.append("master_replid:8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb").append("\r\n"); // todo change after adding replication service
+                sb.append("master_repl_offset:0"); // todo change after adding replication service
+            }
+            case SLAVE -> {}
+        }
+        return sb.toString();
+    }
+
     public static synchronized RedisConfig getInstance() {
         if (INSTANCE == null) {
             synchronized (SimpleStorageService.class) {
