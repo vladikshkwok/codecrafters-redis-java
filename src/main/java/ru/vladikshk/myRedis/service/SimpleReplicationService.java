@@ -59,5 +59,9 @@ public class SimpleReplicationService implements ReplicationService {
         out.write(new RArray(List.of("REPLCONF", "capa", "sync")).getBytes());
         out.flush();
         in.readLine();
+        log.info("Sending psync to master redis");
+        out.write(new RArray(List.of("PSYNC", "?", "-1")).getBytes());
+        out.flush();
+        in.readLine();
     }
 }
