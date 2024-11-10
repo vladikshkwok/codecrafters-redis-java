@@ -25,6 +25,7 @@ public class PsyncCommandHandler implements CommandHandler {
         log.info("Got PSYNC command, send response");
         print(out, resp.getBytes());
         byte[] emptyDB = Base64.getDecoder().decode(EMPTY_RDB);
-        print(out, new RDBFile(emptyDB).getBytes());
+        print(out, ("$" + emptyDB.length + "\r\n").getBytes(), false);
+        print(out, emptyDB);
     }
 }
