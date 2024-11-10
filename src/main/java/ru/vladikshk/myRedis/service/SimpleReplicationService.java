@@ -11,7 +11,7 @@ import java.util.List;
 
 @Slf4j
 public class SimpleReplicationService implements ReplicationService {
-    private static ReplicationService INSTANCE;
+    private static volatile ReplicationService INSTANCE;
     private final RedisConfig redisConfig = RedisConfig.getInstance();
 
     private BufferedReader in;
@@ -49,6 +49,10 @@ public class SimpleReplicationService implements ReplicationService {
     private void sendHandShake() throws IOException {
         log.info("Sending ping to master redis");
         out.write(new RArray(List.of("PING")).getBytes());
+        out.flush();
+        out.write(new RArray(List.of("REPLCONF", "listening-port", redisConfig.getPort().toString())).getBytes());
+        out.flush();
+        out.write(new RArray(List.of("REPLCONF", "capa", "sync")).getBytes());
         out.flush();
     }
 }

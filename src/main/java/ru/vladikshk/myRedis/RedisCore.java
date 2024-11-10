@@ -1,7 +1,7 @@
 package ru.vladikshk.myRedis;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.vladikshk.myRedis.commands.ClientHandler;
+import ru.vladikshk.myRedis.server.ClientHandler;
 import ru.vladikshk.myRedis.service.*;
 
 import java.io.File;
@@ -22,7 +22,6 @@ public class RedisCore {
     private static final RedisConfig redisConfig = RedisConfig.getInstance();
     private static final ReplicationService replicationService = SimpleReplicationService.getInstance();
     private static StorageService storageService;
-    private static int DEFAULT_PORT = 6379;
     private static final List<Socket> clientsSockets = new ArrayList<>();
 
     public static void startRedis(String[] args) {
@@ -32,8 +31,8 @@ public class RedisCore {
         connectIfReplica();
 
         ExecutorService executor = Executors.newCachedThreadPool();
-        System.out.println(redisConfig.getPort().orElse(DEFAULT_PORT));
-        try (ServerSocket serverSocket = new ServerSocket(redisConfig.getPort().orElse(DEFAULT_PORT));) {
+
+        try (ServerSocket serverSocket = new ServerSocket(redisConfig.getPort());) {
             serverSocket.setReuseAddress(true);
             log.info("Binded on localhost:{}", serverSocket.getLocalPort());
 

@@ -16,6 +16,8 @@ import static ru.vladikshk.myRedis.data.RedisRole.SLAVE;
 @Getter
 @Setter
 public class RedisConfig {
+    private static int DEFAULT_PORT = 6379;
+
     private static volatile RedisConfig INSTANCE;
     private final Map<String, String> configMap;
     private File dbFile;
@@ -32,9 +34,10 @@ public class RedisConfig {
         return Optional.ofNullable(configMap.get(key));
     }
 
-    public Optional<Integer> getPort() {
+    public Integer getPort() {
         return Optional.ofNullable(configMap.get("port"))
-            .map(Integer::parseInt);
+            .map(Integer::parseInt)
+            .orElse(DEFAULT_PORT);
     }
 
     public RedisRole getRole() {

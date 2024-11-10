@@ -1,4 +1,4 @@
-package ru.vladikshk.myRedis.commands;
+package ru.vladikshk.myRedis.server;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +28,8 @@ public class ClientHandler implements Runnable {
             new GetCommandHandler(storageService),
             new ConfigCommandHandler(List.of(new ConfigGetCommandSubHandler(redisConfig))),
             new KeysCommandHandler(storageService),
-            new InfoCommandHandler(List.of(new ReplicationInfoSubhandler(redisConfig)))
+            new InfoCommandHandler(List.of(new ReplicationInfoSubhandler(redisConfig))),
+            new ReplConfCommandHandler()
         );
     }
 
