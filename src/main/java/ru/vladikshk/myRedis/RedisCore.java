@@ -62,15 +62,16 @@ public class RedisCore {
             .map(s -> s.split(" "))
             .orElseThrow(IllegalStateException::new);
 
-        try (Socket connection = replicationService.connect(connectionInfo[0], Integer.parseInt(connectionInfo[1]))) {
+        Socket connection = replicationService.connect(connectionInfo[0], Integer.parseInt(connectionInfo[1]));
+        try {
             EXECUTOR.submit(
                 new ServerConnection(storageService, redisConfig, replicationService, connection, true)
             );
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        } finally {
-            System.exit(0);
+        } catch (IOException e) {
+            log.error("IOException: {}", e.getMessage(), e);
+            System.exit(1);
         }
+
     }
 
     private static void setStorageService() {
