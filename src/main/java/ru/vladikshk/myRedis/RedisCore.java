@@ -21,6 +21,7 @@ import static ru.vladikshk.myRedis.data.RedisRole.MASTER;
 public class RedisCore {
     private static final RedisConfig redisConfig = RedisConfig.getInstance();
     private static final ReplicationService replicationService = SimpleReplicationService.getInstance();
+    public static final ExecutorService EXECUTOR = Executors.newCachedThreadPool();
     private static StorageService storageService;
     private static final List<Socket> clientsSockets = new ArrayList<>();
 
@@ -28,9 +29,8 @@ public class RedisCore {
         handleArgs(args);
         setDbFile();
         setStorageService();
-        connectIfReplica(); // todo refactor
 
-        ExecutorService executor = Executors.newCachedThreadPool();
+        connectIfReplica(); // todo refactor
 
         try (ServerSocket serverSocket = new ServerSocket(redisConfig.getPort());) {
             serverSocket.setReuseAddress(true);
@@ -42,7 +42,7 @@ public class RedisCore {
                 clientsSockets.add(clientSocket);
                 log.info("client connected: {}", clientSocket.getInetAddress());
 
-                executor.submit(
+                EXECUTOR.submit(
                     new ServerConnection(storageService, redisConfig, replicationService, clientSocket, false)
                 );
             }
@@ -63,7 +63,9 @@ public class RedisCore {
             .orElseThrow(IllegalStateException::new);
 
         try (Socket connection = replicationService.connect(connectionInfo[0], Integer.parseInt(connectionInfo[1]))) {
-            new ServerConnection(storageService, redisConfig, replicationService, connection, true).run();
+            EXECUTOR.submit(
+                new ServerConnection(storageService, redisConfig, replicationService, connection, true)
+            );
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         } finally {

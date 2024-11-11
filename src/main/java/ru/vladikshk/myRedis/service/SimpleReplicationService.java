@@ -64,6 +64,7 @@ public class SimpleReplicationService implements ReplicationService {
     public void sendCommand(byte[] command) {
         replicas.forEach(repl -> {
             try {
+                repl.out().flush();
                 repl.out().write(command);
                 repl.out().flush();
             } catch (IOException e) {
