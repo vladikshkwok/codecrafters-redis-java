@@ -28,7 +28,7 @@ public class RedisCore {
         handleArgs(args);
         setDbFile();
         setStorageService();
-        connectIfReplica();
+        connectIfReplica(); // todo refactor
 
         ExecutorService executor = Executors.newCachedThreadPool();
 
@@ -41,7 +41,10 @@ public class RedisCore {
                 Socket clientSocket = serverSocket.accept();
                 clientsSockets.add(clientSocket);
                 log.info("client connected: {}", clientSocket.getInetAddress());
-                executor.submit(new ServerConnection(storageService, redisConfig, clientSocket));
+
+                executor.submit(
+                    new ServerConnection(storageService, redisConfig, replicationService, clientSocket, false)
+                );
             }
         } catch (IOException e) {
             log.error("IOException: {}", e.getMessage(), e);
@@ -59,7 +62,13 @@ public class RedisCore {
             .map(s -> s.split(" "))
             .orElseThrow(IllegalStateException::new);
 
-        replicationService.connect(connectionInfo[0], Integer.parseInt(connectionInfo[1]));
+        try (Socket connection = replicationService.connect(connectionInfo[0], Integer.parseInt(connectionInfo[1]))) {
+            new ServerConnection(storageService, redisConfig, replicationService, connection, true).run();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        } finally {
+            System.exit(0);
+        }
     }
 
     private static void setStorageService() {

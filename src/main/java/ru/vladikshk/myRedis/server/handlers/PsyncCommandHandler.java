@@ -1,6 +1,8 @@
 package ru.vladikshk.myRedis.server.handlers;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import ru.vladikshk.myRedis.service.ReplicationService;
 import ru.vladikshk.myRedis.types.RDBFile;
 import ru.vladikshk.myRedis.types.RString;
 import ru.vladikshk.myRedis.types.RType;
@@ -12,8 +14,10 @@ import java.util.List;
 import static ru.vladikshk.myRedis.server.handlers.CommandHandler.print;
 
 @Slf4j
+@RequiredArgsConstructor
 public class PsyncCommandHandler implements CommandHandler {
     private static final String EMPTY_RDB = "UkVESVMwMDEx+glyZWRpcy12ZXIFNy4yLjD6CnJlZGlzLWJpdHPAQPoFY3RpbWXCbQi8ZfoIdXNlZC1tZW3CsMQQAPoIYW9mLWJhc2XAAP/wbjv+wP9aog==";
+    private final ReplicationService replicationService;
     @Override
     public boolean canHandle(String command) {
         return "psync".equalsIgnoreCase(command);
@@ -27,5 +31,7 @@ public class PsyncCommandHandler implements CommandHandler {
         byte[] emptyDB = Base64.getDecoder().decode(EMPTY_RDB);
         print(out, ("$" + emptyDB.length + "\r\n").getBytes(), false);
         print(out, emptyDB);
+        print(out, "\r\n".getBytes());  // todo refactor
+        replicationService.addReplica(out); // todo refactor
     }
 }

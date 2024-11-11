@@ -1,8 +1,12 @@
 package ru.vladikshk.myRedis.server.handlers;
 
+import ru.vladikshk.myRedis.data.HandlerType;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+
+import static ru.vladikshk.myRedis.data.HandlerType.*;
 
 public interface CommandHandler {
     static void print(OutputStream out, byte[] bytes, boolean autoFlush) {
@@ -23,4 +27,8 @@ public interface CommandHandler {
     boolean canHandle(String command);
 
     void handle(List<String> args, OutputStream out);
+
+    default HandlerType getHandlerType() {
+        return READ;
+    }
 }

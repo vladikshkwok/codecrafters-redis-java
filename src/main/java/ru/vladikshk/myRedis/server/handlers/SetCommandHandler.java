@@ -2,12 +2,14 @@ package ru.vladikshk.myRedis.server.handlers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import ru.vladikshk.myRedis.data.HandlerType;
 import ru.vladikshk.myRedis.service.StorageService;
 import ru.vladikshk.myRedis.types.RBulkString;
 
 import java.io.OutputStream;
 import java.util.List;
 
+import static ru.vladikshk.myRedis.data.HandlerType.WRITE;
 import static ru.vladikshk.myRedis.server.handlers.CommandHandler.print;
 
 @Slf4j
@@ -37,4 +39,8 @@ public class SetCommandHandler implements CommandHandler {
         print(out, new RBulkString("OK").getBytes());
     }
 
+    @Override
+    public HandlerType getHandlerType() {
+        return WRITE;
+    }
 }

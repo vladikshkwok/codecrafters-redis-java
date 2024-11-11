@@ -1,5 +1,11 @@
 package ru.vladikshk.myRedis.service;
 
+import java.io.OutputStream;
+import java.net.Socket;
+
 public interface ReplicationService {
-    void connect(String host, int port);
+    // todo refactor
+    Socket connect(String host, int port);
+    void addReplica(OutputStream out);
+    void sendCommand(byte[] command);
 }
