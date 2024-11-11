@@ -31,7 +31,6 @@ public class PsyncCommandHandler implements CommandHandler {
         byte[] emptyDB = Base64.getDecoder().decode(EMPTY_RDB);
         print(out, ("$" + emptyDB.length + "\r\n").getBytes(), false);
         print(out, emptyDB);
-        print(out, "\r\n".getBytes());  // todo refactor
         replicationService.addReplica(out); // todo refactor
     }
 }
