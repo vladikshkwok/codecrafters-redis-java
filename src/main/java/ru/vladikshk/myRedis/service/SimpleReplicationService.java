@@ -69,6 +69,13 @@ public class SimpleReplicationService implements ReplicationService {
                 repl.out().flush();
             } catch (IOException e) {
                 log.error("Couldn't send command", e);
+            } finally {
+                try {
+                    repl.out().close();
+                } catch (IOException e) {
+                    log.error("Couldn't close out", e);
+                }
+                replicas.remove(repl);
             }
         });
     }

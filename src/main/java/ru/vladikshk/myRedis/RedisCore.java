@@ -21,7 +21,7 @@ import static ru.vladikshk.myRedis.data.RedisRole.MASTER;
 public class RedisCore {
     private static final RedisConfig redisConfig = RedisConfig.getInstance();
     private static final ReplicationService replicationService = SimpleReplicationService.getInstance();
-    public static final ExecutorService EXECUTOR = Executors.newCachedThreadPool();
+    private static final ExecutorService EXECUTOR = Executors.newCachedThreadPool();
     private static StorageService storageService;
     private static final List<Socket> clientsSockets = new ArrayList<>();
 
