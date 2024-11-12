@@ -23,6 +23,6 @@ public class ConfigGetCommandSubHandler implements ConfigSubhandler {
         String result = redisConfig.getParam(key)
             .orElse("Unknown config parameter");
 
-        CommandHandler.print(out, new RArray(List.of(key, result)).getBytes());
+        print(serverConnection, new RArray(List.of(key, result)).getBytes());
     }
 }
