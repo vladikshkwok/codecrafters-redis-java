@@ -55,7 +55,7 @@ public class SimpleReplicationService implements ReplicationService {
 
     @Override
     public void addReplica(ServerConnection serverConnection) {
-        replicas.add(new ReplicaConnection(serverConnection.getOut()));
+        replicas.add(new ReplicaConnection(serverConnection, serverConnection.getOut()));
     }
 
     @Override
@@ -63,19 +63,28 @@ public class SimpleReplicationService implements ReplicationService {
         Set<ReplicaConnection> failedReplicas = new HashSet<>();
         replicas.forEach(repl -> {
             try {
-                repl.out().write(command);
-                repl.out().flush();
+                repl.getOut().write(command);
+                repl.getOut().flush();
+                repl.setBytesSended(repl.getBytesSended() + command.length);
             } catch (IOException e) {
                 log.error("Couldn't send command to replica", e);
                 failedReplicas.add(repl);
                 try {
-                    repl.out().close();
+                    repl.getOut().close();
                 } catch (IOException closeEx) {
                     log.error("Couldn't close output stream of failed replica", closeEx);
                 }
             }
         });
         replicas.removeAll(failedReplicas); // Remove failed replicas after processing
+    }
+
+    public int getAck(ServerConnection serverConnection) {
+        return replicas.stream()
+            .filter(repl -> repl.getServerConnection().equals(serverConnection))
+            .map(ReplicaConnection::getBytesSended)
+            .findAny()
+            .orElse(0);
     }
 
     private void sendHandShake(OutputStream out, InputStream in) throws IOException {

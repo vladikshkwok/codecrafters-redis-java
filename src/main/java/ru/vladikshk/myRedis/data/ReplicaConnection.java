@@ -1,6 +1,17 @@
 package ru.vladikshk.myRedis.data;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import ru.vladikshk.myRedis.server.ServerConnection;
+
 import java.io.OutputStream;
 
-public record ReplicaConnection(OutputStream out) {
+@Getter
+@Setter
+@RequiredArgsConstructor
+public class ReplicaConnection {
+    private final ServerConnection serverConnection;
+    private final OutputStream out;
+    private int bytesSended;
 }
