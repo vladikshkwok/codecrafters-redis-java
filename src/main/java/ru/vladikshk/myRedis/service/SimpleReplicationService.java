@@ -101,7 +101,7 @@ public class SimpleReplicationService implements ReplicationService {
         log.info("db length: {}", length);
 //        byte[] db = new byte[length - 1];
         in.skip(length);
-        log.info("skipped db from master: {}", new String(db));
+        log.info("skipped db from master");
     }
 
 }
