@@ -9,7 +9,6 @@ import java.util.List;
 
 @RequiredArgsConstructor
 public class ReplConfGetAckSubhandlerImpl implements ReplConfSubhandler {
-    private final ReplicationService replicationService;
     @Override
     public boolean canHandle(String command) {
         return "GETACK".equalsIgnoreCase(command);
@@ -17,7 +16,7 @@ public class ReplConfGetAckSubhandlerImpl implements ReplConfSubhandler {
 
     @Override
     public void handle(List<String> args, ServerConnection serverConnection) {
-        int ack = replicationService.getAck(serverConnection);
-        print(serverConnection, new RArray(List.of("REPLCONF", "ACK", String.valueOf(ack))).getBytes());
+        print(serverConnection,
+            new RArray(List.of("REPLCONF", "ACK", String.valueOf(serverConnection.getReceivedBytes()))).getBytes());
     }
 }

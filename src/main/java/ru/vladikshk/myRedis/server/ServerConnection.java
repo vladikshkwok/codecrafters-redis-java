@@ -28,6 +28,7 @@ public class ServerConnection implements Runnable {
     private final BufferedReader reader;
     private final boolean isReplica;
     private final Socket connection;
+    private long receivedBytes = 0;
 
     public ServerConnection(StorageService storageService, RedisConfig redisConfig,
                             ReplicationService replicationService, Socket socket,
@@ -44,7 +45,7 @@ public class ServerConnection implements Runnable {
             new ConfigCommandHandler(List.of(new ConfigGetCommandSubHandler(redisConfig))),
             new KeysCommandHandler(storageService),
             new InfoCommandHandler(List.of(new ReplicationInfoSubhandler(redisConfig))),
-            new ReplConfCommandHandler(List.of(new ReplConfGetAckSubhandlerImpl(replicationService))),
+            new ReplConfCommandHandler(List.of(new ReplConfGetAckSubhandlerImpl())),
             new PsyncCommandHandler(replicationService)
         );
     }
@@ -57,7 +58,7 @@ public class ServerConnection implements Runnable {
                 List<String> inputArgs = parseInput();
 
                 if (inputArgs.isEmpty()) continue;
-
+                receivedBytes += new RArray(inputArgs).getBytes().length;
                 CommandHandler handler = commandHandlers.stream()
                     .filter(commandHandler -> commandHandler.canHandle(inputArgs.getFirst()))
                     .findFirst()
