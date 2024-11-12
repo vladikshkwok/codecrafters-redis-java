@@ -58,7 +58,7 @@ public class ServerConnection implements Runnable {
                 List<String> inputArgs = parseInput();
 
                 if (inputArgs.isEmpty()) continue;
-                receivedBytes += new RArray(inputArgs).getBytes().length;
+
                 CommandHandler handler = commandHandlers.stream()
                     .filter(commandHandler -> commandHandler.canHandle(inputArgs.getFirst()))
                     .findFirst()
@@ -73,6 +73,8 @@ public class ServerConnection implements Runnable {
                 } catch (Exception e) {
                     log.error("Error handling command: {}", e.getMessage(), e);
                 }
+
+                receivedBytes += new RArray(inputArgs).getBytes().length;
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
