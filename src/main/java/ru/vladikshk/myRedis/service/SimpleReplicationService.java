@@ -44,7 +44,7 @@ public class SimpleReplicationService implements ReplicationService {
                 throw new IllegalStateException("Couldn't connect to master on " + host);
             }
 
-            var in = new BufferedReader(new InputStreamReader(masterConnection.getInputStream()));
+            var in = masterConnection.getInputStream();
             var out = new BufferedOutputStream(masterConnection.getOutputStream());
 
             sendHandShake(out, in);
@@ -79,26 +79,29 @@ public class SimpleReplicationService implements ReplicationService {
         });
     }
 
-    private void sendHandShake(OutputStream out, BufferedReader in) throws IOException {
+    private void sendHandShake(OutputStream out, InputStream in) throws IOException {
+        var reader = new BufferedReader(new InputStreamReader(in));
         log.info("Sending ping to master redis");
         out.write(new RArray(List.of("PING")).getBytes());
         out.flush();
-        log.info("response: {}", in.readLine());
+        log.info("response: {}", reader.readLine());
         log.info("Sending replconf to master redis with listening port");
         out.write(new RArray(List.of("REPLCONF", "listening-port", redisConfig.getPort().toString())).getBytes());
         out.flush();
-        log.info("response: {}", in.readLine());
+        log.info("response: {}", reader.readLine());
         log.info("Sending replconf to master redis with capabilities");
         out.write(new RArray(List.of("REPLCONF", "capa", "sync")).getBytes());
         out.flush();
-        log.info("response: {}", in.readLine());
+        log.info("response: {}", reader.readLine());
         log.info("Sending psync to master redis");
         out.write(new RArray(List.of("PSYNC", "?", "-1")).getBytes());
         out.flush();
-        log.info("response1: {}", in.readLine());
-        int length = Integer.parseInt(in.readLine().substring(1));
-        log.info("response1: {}", length);
-        in.read(CharBuffer.allocate(length)); // skip rdb
+        log.info("response: {}", reader.readLine());
+        int length = Integer.parseInt(reader.readLine().substring(1));
+        log.info("db length: {}", length);
+//        byte[] db = new byte[length - 1];
+        in.skip(length);
+        log.info("skipped db from master: {}", new String(db));
     }
 
 }
