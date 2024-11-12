@@ -8,6 +8,7 @@ import ru.vladikshk.myRedis.types.RArray;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.CharBuffer;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -78,27 +79,26 @@ public class SimpleReplicationService implements ReplicationService {
         });
     }
 
-    private void sendHandShake(OutputStream out1, BufferedReader in1) throws IOException {
+    private void sendHandShake(OutputStream out, BufferedReader in) throws IOException {
         log.info("Sending ping to master redis");
-        out1.write(new RArray(List.of("PING")).getBytes());
-        out1.flush();
-        log.info("response: {}", in1.readLine());
+        out.write(new RArray(List.of("PING")).getBytes());
+        out.flush();
+        log.info("response: {}", in.readLine());
         log.info("Sending replconf to master redis with listening port");
-        out1.write(new RArray(List.of("REPLCONF", "listening-port", redisConfig.getPort().toString())).getBytes());
-        out1.flush();
-        log.info("response: {}", in1.readLine());
+        out.write(new RArray(List.of("REPLCONF", "listening-port", redisConfig.getPort().toString())).getBytes());
+        out.flush();
+        log.info("response: {}", in.readLine());
         log.info("Sending replconf to master redis with capabilities");
-        out1.write(new RArray(List.of("REPLCONF", "capa", "sync")).getBytes());
-        out1.flush();
-        log.info("response: {}", in1.readLine());
+        out.write(new RArray(List.of("REPLCONF", "capa", "sync")).getBytes());
+        out.flush();
+        log.info("response: {}", in.readLine());
         log.info("Sending psync to master redis");
-        out1.write(new RArray(List.of("PSYNC", "?", "-1")).getBytes());
-        out1.flush();
-        log.info("response1: {}", in1.readLine());
-        log.info("response2: {}", in1.readLine());
-        log.info("response3: {}", in1.readLine());
-        log.info("response4: {}", in1.readLine());
-        log.info("response5: {}", in1.readLine());
+        out.write(new RArray(List.of("PSYNC", "?", "-1")).getBytes());
+        out.flush();
+        log.info("response1: {}", in.readLine());
+        int length = Integer.parseInt(in.readLine().substring(1));
+        log.info("response1: {}", length);
+        in.read(CharBuffer.allocate(length)); // skip rdb
     }
 
 }
