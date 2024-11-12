@@ -100,7 +100,7 @@ public class SimpleReplicationService implements ReplicationService {
         log.info("response: {}", readLineFromInputStream(in));
         int length = Integer.parseInt(readLineFromInputStream(in).substring(1));
         log.info("db length: {}", length);
-        byte[] db = new byte[length - 1];
+        byte[] db = new byte[length];
         in.read(db);
         log.info("readed db from master");
     }

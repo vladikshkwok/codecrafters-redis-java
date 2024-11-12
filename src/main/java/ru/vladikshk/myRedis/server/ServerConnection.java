@@ -56,7 +56,7 @@ public class ServerConnection implements Runnable {
                 log.info("[{}] Waiting for incoming command...", isReplica ? "slave" : "master");
                 List<String> inputArgs = parseInput();
 
-                if (inputArgs == null || inputArgs.isEmpty()) continue;
+                if (inputArgs.isEmpty()) continue;
 
                 CommandHandler handler = commandHandlers.stream()
                     .filter(commandHandler -> commandHandler.canHandle(inputArgs.getFirst()))
@@ -73,30 +73,28 @@ public class ServerConnection implements Runnable {
                     log.error("Error handling command: {}", e.getMessage(), e);
                 }
             }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         } finally {
             closeConnection();
         }
     }
 
-    public List<String> parseInput() {
-        try {
-            String command = reader.readLine();
-            if (command == null || command.trim().isEmpty()) {
-                return null;
-            }
-            log.info("Received input: {}", command);
+    public List<String> parseInput() throws IOException {
 
-            if (command.charAt(0) == '*') {
-                return parseRedisArray(command);
-            } else if (command.charAt(0) == '$') {
-                return List.of(parseRedisString(command));
-            } else {
-                log.warn("Unexpected command format: {}", command);
-                return null;
-            }
-        } catch (IOException e) {
-            log.error("Couldn't parse input", e);
-            return null;
+        String command = reader.readLine();
+        if (command == null || command.trim().isEmpty()) {
+            throw new IllegalArgumentException("Empty command");
+        }
+        log.info("Received input: {}", command);
+
+        if (command.charAt(0) == '*') {
+            return parseRedisArray(command);
+        } else if (command.charAt(0) == '$') {
+            return List.of(parseRedisString(command));
+        } else {
+            log.warn("Unexpected command format: {}", command);
+            throw new IllegalArgumentException("Unknown command: " + command);
         }
     }
 
