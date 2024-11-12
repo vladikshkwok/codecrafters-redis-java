@@ -2,12 +2,10 @@ package ru.vladikshk.myRedis.server.handlers.subhandlers.info;
 
 import lombok.RequiredArgsConstructor;
 import ru.vladikshk.myRedis.RedisConfig;
+import ru.vladikshk.myRedis.server.ServerConnection;
 import ru.vladikshk.myRedis.types.RBulkString;
 
-import java.io.OutputStream;
 import java.util.List;
-
-import static ru.vladikshk.myRedis.server.handlers.CommandHandler.print;
 
 @RequiredArgsConstructor
 public class ReplicationInfoSubhandler implements InfoSubhandler {
@@ -19,7 +17,7 @@ public class ReplicationInfoSubhandler implements InfoSubhandler {
     }
 
     @Override
-    public void handle(List<String> args, OutputStream out) {
-        print(out, new RBulkString(redisConfig.getReplicationInfo()).getBytes());
+    public void handle(List<String> args, ServerConnection serverConnection) {
+        print(serverConnection, new RBulkString(redisConfig.getReplicationInfo()).getBytes());
     }
 }

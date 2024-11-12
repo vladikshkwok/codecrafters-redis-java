@@ -2,13 +2,11 @@ package ru.vladikshk.myRedis.server.handlers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import ru.vladikshk.myRedis.server.ServerConnection;
 import ru.vladikshk.myRedis.service.StorageService;
 import ru.vladikshk.myRedis.types.RBulkString;
 
-import java.io.OutputStream;
 import java.util.List;
-
-import static ru.vladikshk.myRedis.server.handlers.CommandHandler.print;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -21,11 +19,11 @@ public class GetCommandHandler implements CommandHandler {
     }
 
     @Override
-    public void handle(List<String> args, OutputStream out) {
+    public void handle(List<String> args, ServerConnection serverConnection) {
         String key = args.get(1);
 
         String value = storageService.get(key);
-        print(out, new RBulkString(value).getBytes());
+        print(serverConnection, new RBulkString(value).getBytes());
         log.info("Got element={}:{} from storage", key, value);
     }
 }

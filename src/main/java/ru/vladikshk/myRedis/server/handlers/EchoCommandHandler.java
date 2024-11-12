@@ -1,13 +1,11 @@
 package ru.vladikshk.myRedis.server.handlers;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.vladikshk.myRedis.server.ServerConnection;
 import ru.vladikshk.myRedis.types.RBulkString;
 import ru.vladikshk.myRedis.types.RType;
 
-import java.io.OutputStream;
 import java.util.List;
-
-import static ru.vladikshk.myRedis.server.handlers.CommandHandler.print;
 
 @Slf4j
 public class EchoCommandHandler implements CommandHandler {
@@ -17,9 +15,9 @@ public class EchoCommandHandler implements CommandHandler {
     }
 
     @Override
-    public void handle(List<String> args, OutputStream out) {
+    public void handle(List<String> args, ServerConnection serverConnection) {
         RType echoArgs = new RBulkString(args.getLast());
-        print(out, echoArgs.getBytes());
+        print(serverConnection, echoArgs.getBytes());
         log.info("ECHO: {}", echoArgs);
     }
 

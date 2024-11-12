@@ -1,6 +1,6 @@
 package ru.vladikshk.myRedis.server;
 
-import lombok.SneakyThrows;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import ru.vladikshk.myRedis.RedisConfig;
 import ru.vladikshk.myRedis.server.handlers.*;
@@ -19,23 +19,23 @@ import java.util.List;
 import static ru.vladikshk.myRedis.data.HandlerType.WRITE;
 
 @Slf4j
+@Getter
 public class ServerConnection implements Runnable {
     private final List<CommandHandler> commandHandlers;
     private final ReplicationService replicationService;
 
     private final BufferedReader in;
     private final OutputStream out;
+    private final boolean isReplica;
 
     public ServerConnection(StorageService storageService, RedisConfig redisConfig,
                             ReplicationService replicationService, Socket socket,
                             boolean isReplica) throws IOException {
         this.replicationService = replicationService;
         this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        if (isReplica) {
-            this.out = System.out;
-        } else {
-            this.out = new BufferedOutputStream(socket.getOutputStream());
-        }
+        this.out = new BufferedOutputStream(socket.getOutputStream());
+        this.isReplica = isReplica;
+
         this.commandHandlers = List.of(
             new PingCommandHandler(), new EchoCommandHandler(), new SetCommandHandler(storageService),
             new GetCommandHandler(storageService),
@@ -59,10 +59,10 @@ public class ServerConnection implements Runnable {
                 .findAny()
                 .orElse(new DefaultCommandHandler());
 
-            handler.handle(inputArgs, out);
+            handler.handle(inputArgs, this);
 
             if (WRITE.equals(handler.getHandlerType())) {
-                replicationService.sendCommand(new RArray(inputArgs).getBytes());
+                sendToReplicas(inputArgs);
             }
         }
     }
@@ -85,6 +85,10 @@ public class ServerConnection implements Runnable {
             log.error("Couldn't parse input", e);
         }
         return null;
+    }
+
+    private void sendToReplicas(List<String> inputArgs) {
+        replicationService.sendCommand(new RArray(inputArgs).getBytes());
     }
 
     private String parseRedisString(String command) throws IOException {

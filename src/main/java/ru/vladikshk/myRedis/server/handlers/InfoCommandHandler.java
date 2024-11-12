@@ -2,9 +2,9 @@ package ru.vladikshk.myRedis.server.handlers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import ru.vladikshk.myRedis.server.ServerConnection;
 import ru.vladikshk.myRedis.server.handlers.subhandlers.info.InfoSubhandler;
 
-import java.io.OutputStream;
 import java.util.List;
 
 @Slf4j
@@ -18,13 +18,13 @@ public class InfoCommandHandler implements CommandHandler {
     }
 
     @Override
-    public void handle(List<String> args, OutputStream out) {
+    public void handle(List<String> args, ServerConnection serverConnection) {
         log.info("Using info handler");
         infoSubHandlers.stream()
             .filter(sub -> sub.canHandle(args.get(1)))
             .findAny()
             .orElseThrow(IllegalArgumentException::new)
-            .handle(args, out);
+            .handle(args, serverConnection);
     }
 
 }

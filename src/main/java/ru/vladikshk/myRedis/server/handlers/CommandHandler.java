@@ -1,6 +1,7 @@
 package ru.vladikshk.myRedis.server.handlers;
 
 import ru.vladikshk.myRedis.data.HandlerType;
+import ru.vladikshk.myRedis.server.ServerConnection;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -9,24 +10,29 @@ import java.util.List;
 import static ru.vladikshk.myRedis.data.HandlerType.*;
 
 public interface CommandHandler {
-    static void print(OutputStream out, byte[] bytes, boolean autoFlush) {
+
+    default void print(ServerConnection serverConnection, byte[] bytes) {
+        print(serverConnection, bytes, true);
+    }
+
+    default void print(ServerConnection serverConnection, byte[] bytes, boolean autoFlush) {
+        if (serverConnection.isReplica() && !REPL.equals(getHandlerType())) {
+            return;
+        }
+
         try {
-            out.write(bytes);
+            serverConnection.getOut().write(bytes);
             if (autoFlush) {
-                out.flush();
+                serverConnection.getOut().flush();
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    static void print(OutputStream out, byte[] bytes) {
-        print(out, bytes, true);
-    }
-
     boolean canHandle(String command);
 
-    void handle(List<String> args, OutputStream out);
+    void handle(List<String> args, ServerConnection serverConnection);
 
     default HandlerType getHandlerType() {
         return READ;

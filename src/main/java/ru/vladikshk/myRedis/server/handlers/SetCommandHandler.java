@@ -3,14 +3,13 @@ package ru.vladikshk.myRedis.server.handlers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.vladikshk.myRedis.data.HandlerType;
+import ru.vladikshk.myRedis.server.ServerConnection;
 import ru.vladikshk.myRedis.service.StorageService;
 import ru.vladikshk.myRedis.types.RBulkString;
 
-import java.io.OutputStream;
 import java.util.List;
 
 import static ru.vladikshk.myRedis.data.HandlerType.WRITE;
-import static ru.vladikshk.myRedis.server.handlers.CommandHandler.print;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -23,7 +22,7 @@ public class SetCommandHandler implements CommandHandler {
     }
 
     @Override
-    public void handle(List<String> args, OutputStream out) {
+    public void handle(List<String> args, ServerConnection serverConnection) {
         String key = args.get(1);
         String value = args.get(2);
 
@@ -36,7 +35,7 @@ public class SetCommandHandler implements CommandHandler {
             log.info("Set element {}:{}", key, value);
         }
 
-        print(out, new RBulkString("OK").getBytes());
+        print(serverConnection, new RBulkString("OK").getBytes());
     }
 
     @Override

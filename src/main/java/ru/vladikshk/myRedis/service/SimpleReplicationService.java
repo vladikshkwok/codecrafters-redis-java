@@ -3,6 +3,7 @@ package ru.vladikshk.myRedis.service;
 import lombok.extern.slf4j.Slf4j;
 import ru.vladikshk.myRedis.RedisConfig;
 import ru.vladikshk.myRedis.data.ReplicaConnection;
+import ru.vladikshk.myRedis.server.ServerConnection;
 import ru.vladikshk.myRedis.types.RArray;
 
 import java.io.*;
@@ -56,8 +57,8 @@ public class SimpleReplicationService implements ReplicationService {
     }
 
     @Override
-    public void addReplica(OutputStream out) {
-        replicas.add(new ReplicaConnection(out));
+    public void addReplica(ServerConnection serverConnection) {
+        replicas.add(new ReplicaConnection(serverConnection.getOut()));
     }
 
     @Override
