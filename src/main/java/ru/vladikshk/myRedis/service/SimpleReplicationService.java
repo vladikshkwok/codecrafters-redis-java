@@ -43,8 +43,8 @@ public class SimpleReplicationService implements ReplicationService {
                 throw new IllegalStateException("Couldn't connect to master on " + host);
             }
 
-            BufferedInputStream in = new BufferedInputStream(masterConnection.getInputStream());
-            BufferedOutputStream out = new BufferedOutputStream(masterConnection.getOutputStream());
+            InputStream in = masterConnection.getInputStream();
+            OutputStream out = masterConnection.getOutputStream();
 
             sendHandShake(out, in);
             return masterConnection;
