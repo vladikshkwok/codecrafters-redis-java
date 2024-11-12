@@ -10,5 +10,5 @@ public interface ReplicationService {
     Socket connect(String host, int port);
     void addReplica(ServerConnection serverConnection);
     void sendCommand(byte[] command);
-    int getAck(ServerConnection connection);
+    int getReplicaCount();
 }

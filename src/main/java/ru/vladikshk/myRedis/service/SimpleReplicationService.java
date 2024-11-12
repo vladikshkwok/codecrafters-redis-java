@@ -79,12 +79,9 @@ public class SimpleReplicationService implements ReplicationService {
         replicas.removeAll(failedReplicas); // Remove failed replicas after processing
     }
 
-    public int getAck(ServerConnection serverConnection) {
-        return replicas.stream()
-            .filter(repl -> repl.getServerConnection().equals(serverConnection))
-            .map(ReplicaConnection::getBytesSended)
-            .findAny()
-            .orElse(0);
+    @Override
+    public int getReplicaCount() {
+        return replicas.size();
     }
 
     private void sendHandShake(OutputStream out, InputStream in) throws IOException {
