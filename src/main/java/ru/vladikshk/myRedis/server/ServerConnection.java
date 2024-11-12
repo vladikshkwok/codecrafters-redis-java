@@ -24,17 +24,19 @@ public class ServerConnection implements Runnable {
     private final List<CommandHandler> commandHandlers;
     private final ReplicationService replicationService;
 
-    private final BufferedReader in;
     private final OutputStream out;
+    private final BufferedReader reader;
     private final boolean isReplica;
+    private final Socket connection;
 
     public ServerConnection(StorageService storageService, RedisConfig redisConfig,
                             ReplicationService replicationService, Socket socket,
                             boolean isReplica) throws IOException {
         this.replicationService = replicationService;
-        this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         this.out = new BufferedOutputStream(socket.getOutputStream());
         this.isReplica = isReplica;
+        this.connection = socket;
 
         this.commandHandlers = List.of(
             new PingCommandHandler(), new EchoCommandHandler(), new SetCommandHandler(storageService),
@@ -49,43 +51,53 @@ public class ServerConnection implements Runnable {
 
     @Override
     public void run() {
-        while (true) {
-            log.info("[{}] Waiting for incoming command...", isReplica ? "slave" : "master");
-            List<String> inputArgs = parseInput();
+        try {
+            while (!Thread.currentThread().isInterrupted()) {
+                log.info("[{}] Waiting for incoming command...", isReplica ? "slave" : "master");
+                List<String> inputArgs = parseInput();
 
-            if (inputArgs == null || inputArgs.isEmpty()) continue;
+                if (inputArgs == null || inputArgs.isEmpty()) continue;
 
-            CommandHandler handler = commandHandlers.stream()
-                .filter(commandHandler -> commandHandler.canHandle(inputArgs.getFirst()))
-                .findAny()
-                .orElse(new DefaultCommandHandler());
+                CommandHandler handler = commandHandlers.stream()
+                    .filter(commandHandler -> commandHandler.canHandle(inputArgs.getFirst()))
+                    .findFirst()
+                    .orElse(new DefaultCommandHandler());
 
-            handler.handle(inputArgs, this);
+                try {
+                    handler.handle(inputArgs, this);
 
-            if (WRITE.equals(handler.getHandlerType())) {
-                sendToReplicas(inputArgs);
+                    if (WRITE.equals(handler.getHandlerType())) {
+                        sendToReplicas(inputArgs);
+                    }
+                } catch (Exception e) {
+                    log.error("Error handling command: {}", e.getMessage(), e);
+                }
             }
+        } finally {
+            closeConnection();
         }
     }
 
     public List<String> parseInput() {
         try {
-            String command = in.readLine();
+            String command = reader.readLine();
             if (command == null || command.trim().isEmpty()) {
                 return null;
             }
-            log.info("Received input: " + command);
+            log.info("Received input: {}", command);
 
             if (command.charAt(0) == '*') {
                 return parseRedisArray(command);
-            }
-            if (command.charAt(0) == '$') {
+            } else if (command.charAt(0) == '$') {
                 return List.of(parseRedisString(command));
+            } else {
+                log.warn("Unexpected command format: {}", command);
+                return null;
             }
         } catch (IOException e) {
             log.error("Couldn't parse input", e);
+            return null;
         }
-        return null;
     }
 
     private void sendToReplicas(List<String> inputArgs) {
@@ -94,10 +106,10 @@ public class ServerConnection implements Runnable {
 
     private String parseRedisString(String command) throws IOException {
         int strlen = Integer.parseInt(command.substring(1));
-        String str = in.readLine();
+        String str = reader.readLine();
         log.info("Reading redis string={} with length={}", str, strlen);
         if (str.length() > strlen) {
-            throw new IllegalArgumentException("String length differ with given length value");
+            throw new IllegalArgumentException("String length differs from the given length value");
         }
         return str;
     }
@@ -110,5 +122,15 @@ public class ServerConnection implements Runnable {
             list.add(parseInput().getFirst());
         }
         return list;
+    }
+
+    private void closeConnection() {
+        try {
+            out.close();
+            reader.close();
+            log.info("Connection closed.");
+        } catch (IOException e) {
+            log.error("Error while closing connection", e);
+        }
     }
 }

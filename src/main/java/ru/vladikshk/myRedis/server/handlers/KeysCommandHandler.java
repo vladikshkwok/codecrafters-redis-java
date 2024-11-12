@@ -19,7 +19,6 @@ public class KeysCommandHandler implements CommandHandler {
         return "KEYS".equals(command);
     }
 
-    @SneakyThrows
     @Override
     public void handle(List<String> args, ServerConnection serverConnection) {
         String keyPattern = args.get(1);
