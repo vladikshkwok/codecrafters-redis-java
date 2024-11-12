@@ -50,6 +50,7 @@ public class ServerConnection implements Runnable {
     @Override
     public void run() {
         while (true) {
+            log.info("{} Waiting for incoming command...", isReplica ? "slave" : "master");
             List<String> inputArgs = parseInput();
 
             if (inputArgs == null || inputArgs.isEmpty()) continue;

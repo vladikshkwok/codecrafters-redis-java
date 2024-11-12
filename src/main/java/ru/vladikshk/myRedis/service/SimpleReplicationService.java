@@ -98,6 +98,7 @@ public class SimpleReplicationService implements ReplicationService {
         out.write(new RArray(List.of("PSYNC", "?", "-1")).getBytes());
         out.flush();
         log.info("response: {}", in.readLine());
+        in.readLine();
     }
 
 }
