@@ -102,6 +102,8 @@ public class SimpleReplicationService implements ReplicationService {
         Instant expiration = Instant.now().plusMillis(timeoutMs);
         while (Instant.now().isBefore(expiration)) {
             long aknowledgedReplicas = replicas.stream()
+                .peek(repl -> log.info("Replica ({}) byteSended={}, byteAcked={}", repl.getServerConnection(),
+                    repl.getBytesSended(), repl.getBytesAcknowledged()))
                 .filter(repl -> repl.getBytesSended() == repl.getBytesAcknowledged())
                 .count();
             if (aknowledgedReplicas >= count || aknowledgedReplicas == replicas.size()) {
@@ -117,7 +119,10 @@ public class SimpleReplicationService implements ReplicationService {
         replicas.stream()
             .filter(repl -> repl.getServerConnection().equals(connection))
             .findAny()
-            .ifPresent(replicaConnection -> replicaConnection.setBytesAcknowledged(bytesAcked));
+            .ifPresent(replicaConnection -> {
+                log.info("Update bytes acked={} for serverConnection={}", bytesAcked, connection);
+                replicaConnection.setBytesAcknowledged(bytesAcked);
+            });
     }
 
     private void sendHandShake(OutputStream out, InputStream in) throws IOException {
