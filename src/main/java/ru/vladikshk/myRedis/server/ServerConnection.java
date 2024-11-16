@@ -6,6 +6,7 @@ import ru.vladikshk.myRedis.RedisConfig;
 import ru.vladikshk.myRedis.server.handlers.*;
 import ru.vladikshk.myRedis.server.handlers.subhandlers.config.ConfigGetCommandSubHandler;
 import ru.vladikshk.myRedis.server.handlers.subhandlers.info.ReplicationInfoSubhandler;
+import ru.vladikshk.myRedis.server.handlers.subhandlers.replconfig.ReplConfAckSubhandlerImpl;
 import ru.vladikshk.myRedis.server.handlers.subhandlers.replconfig.ReplConfGetAckSubhandlerImpl;
 import ru.vladikshk.myRedis.service.ReplicationService;
 import ru.vladikshk.myRedis.service.StorageService;
@@ -45,7 +46,7 @@ public class ServerConnection implements Runnable {
             new ConfigCommandHandler(List.of(new ConfigGetCommandSubHandler(redisConfig))),
             new KeysCommandHandler(storageService),
             new InfoCommandHandler(List.of(new ReplicationInfoSubhandler(redisConfig))),
-            new ReplConfCommandHandler(List.of(new ReplConfGetAckSubhandlerImpl())),
+            new ReplConfCommandHandler(List.of(new ReplConfGetAckSubhandlerImpl(), new ReplConfAckSubhandlerImpl(replicationService))),
             new PsyncCommandHandler(replicationService), new WaitCommandHandler(replicationService)
         );
     }
