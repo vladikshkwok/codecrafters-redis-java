@@ -24,9 +24,10 @@ public class WaitCommandHandler implements CommandHandler {
         log.info("Waiting");
         int waitForReplicasCount = Integer.parseInt(args.get(1));
         long timeoutMs = Long.parseLong(args.get(2));
-        RType pong = new RInteger(replicationService.getReplicaCount());
+        boolean acked = replicationService.waitForReplicasOrTimeout(waitForReplicasCount, timeoutMs);
 
-        replicationService.waitForReplicasOrTimeout(waitForReplicasCount, timeoutMs);
-        print(serverConnection, pong.getBytes());
+        RType count = acked ? new RInteger(waitForReplicasCount) : new RInteger(replicationService.getReplicaCount());
+
+        print(serverConnection, count.getBytes());
     }
 }
