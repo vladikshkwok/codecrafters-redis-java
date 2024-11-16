@@ -47,7 +47,8 @@ public class ServerConnection implements Runnable {
             new KeysCommandHandler(storageService),
             new InfoCommandHandler(List.of(new ReplicationInfoSubhandler(redisConfig))),
             new ReplConfCommandHandler(List.of(new ReplConfGetAckSubhandlerImpl(), new ReplConfAckSubhandlerImpl(replicationService))),
-            new PsyncCommandHandler(replicationService), new WaitCommandHandler(replicationService)
+            new PsyncCommandHandler(replicationService), new WaitCommandHandler(replicationService),
+            new TypeCommandHandler(storageService)
         );
     }
 
