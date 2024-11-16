@@ -17,7 +17,7 @@ public class ReplConfAckSubhandlerImpl implements ReplConfSubhandler {
 
     @Override
     public void handle(List<String> args, ServerConnection serverConnection) {
-        String bytesReceived = args.get(2);
-        replicationService.
+        int bytesAcknowledged = Integer.parseInt(args.get(2));
+        replicationService.setBytesAcknowledged(serverConnection, bytesAcknowledged);
     }
 }

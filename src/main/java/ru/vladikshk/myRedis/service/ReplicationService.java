@@ -11,5 +11,5 @@ public interface ReplicationService {
     void sendCommand(byte[] command);
     int getReplicaCount();
     void waitForReplicasOrTimeout(int count, long timeoutMs);
-    void setBytesAcknowledged(ServerConnection connection, int bytesReceived);
+    void setBytesAcknowledged(ServerConnection connection, int bytesAcked);
 }
