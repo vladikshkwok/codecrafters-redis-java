@@ -1,17 +1,20 @@
 package ru.vladikshk.myRedis.service;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import ru.vladikshk.myRedis.RedisConfig;
 import ru.vladikshk.myRedis.data.ReplicaConnection;
+import ru.vladikshk.myRedis.ex.AwaitingTimeoutException;
 import ru.vladikshk.myRedis.server.ServerConnection;
 import ru.vladikshk.myRedis.types.RArray;
 
 import java.io.*;
 import java.net.Socket;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 
 @Slf4j
 public class SimpleReplicationService implements ReplicationService {
@@ -55,33 +58,59 @@ public class SimpleReplicationService implements ReplicationService {
 
     @Override
     public void addReplica(ServerConnection serverConnection) {
-        replicas.add(new ReplicaConnection(serverConnection, serverConnection.getOut()));
+        replicas.add(getReplicaConnection(serverConnection));
+    }
+
+    private static ReplicaConnection getReplicaConnection(ServerConnection serverConnection) {
+        return new ReplicaConnection(serverConnection, serverConnection.getOut(), serverConnection.getReader(), new PriorityBlockingQueue<>());
     }
 
     @Override
     public void sendCommand(byte[] command) {
         Set<ReplicaConnection> failedReplicas = new HashSet<>();
-        replicas.forEach(repl -> {
-            try {
-                repl.getOut().write(command);
-                repl.getOut().flush();
-                repl.setBytesSended(repl.getBytesSended() + command.length);
-            } catch (IOException e) {
-                log.error("Couldn't send command to replica", e);
-                failedReplicas.add(repl);
+        String commandStr = new String(command);
+        replicas.forEach(repl ->
+            CompletableFuture.runAsync(() -> {
                 try {
-                    repl.getOut().close();
-                } catch (IOException closeEx) {
-                    log.error("Couldn't close output stream of failed replica", closeEx);
+                    repl.getOut().write(command);
+                    repl.getOut().flush();
+                    repl.setBytesSended(repl.getBytesSended() + command.length);
+                    repl.getPendingCommands().add(commandStr);
+                    repl.getIn().readLine(); // wait until received answer
+                } catch (IOException e) {
+                    log.error("Couldn't send command to replica", e);
+                    failedReplicas.add(repl);
+                    try {
+                        repl.getOut().close();
+                    } catch (IOException closeEx) {
+                        log.error("Couldn't close output stream of failed replica", closeEx);
+                    }
                 }
-            }
-        });
+            }).thenRun(() -> repl.getPendingCommands().remove(commandStr))
+        );
         replicas.removeAll(failedReplicas); // Remove failed replicas after processing
     }
+
+
 
     @Override
     public int getReplicaCount() {
         return replicas.size();
+    }
+
+    @SneakyThrows
+    @Override
+    public void waitForReplicasOrTimeout(int count, long timeoutMs) {
+        Instant expiration = Instant.now().plusMillis(timeoutMs);
+        while (Instant.now().isBefore(expiration)) {
+            long aknowledgedReplicas = replicas.stream()
+                .filter(repl -> repl.getPendingCommands().isEmpty())
+                .count();
+            if (aknowledgedReplicas >= count || aknowledgedReplicas == replicas.size()) {
+                return;
+            }
+            TimeUnit.MILLISECONDS.sleep(50);
+        }
     }
 
     private void sendHandShake(OutputStream out, InputStream in) throws IOException {

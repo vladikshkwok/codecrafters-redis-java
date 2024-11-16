@@ -2,7 +2,6 @@ package ru.vladikshk.myRedis.service;
 
 import ru.vladikshk.myRedis.server.ServerConnection;
 
-import java.io.OutputStream;
 import java.net.Socket;
 
 public interface ReplicationService {
@@ -11,4 +10,5 @@ public interface ReplicationService {
     void addReplica(ServerConnection serverConnection);
     void sendCommand(byte[] command);
     int getReplicaCount();
+    void waitForReplicasOrTimeout(int count, long timeoutMs);
 }
