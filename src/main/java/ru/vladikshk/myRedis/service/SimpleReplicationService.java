@@ -76,6 +76,7 @@ public class SimpleReplicationService implements ReplicationService {
                     repl.getOut().flush();
                     repl.setBytesSended(repl.getBytesSended() + command.length);
                     repl.getPendingCommands().add(commandStr);
+                    repl.getOut().write(new RArray(List.of("REPLCONF", "GETACK", "*")).getBytes());
                     repl.getIn().readLine(); // wait until received answer
                 } catch (IOException e) {
                     log.error("Couldn't send command to replica", e);

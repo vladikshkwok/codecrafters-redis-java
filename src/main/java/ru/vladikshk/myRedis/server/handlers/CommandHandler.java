@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 
-import static java.util.Arrays.asList;
 import static ru.vladikshk.myRedis.data.HandlerType.*;
 
 public interface CommandHandler {
@@ -17,7 +16,7 @@ public interface CommandHandler {
     }
 
     default void print(ServerConnection serverConnection, byte[] bytes, boolean autoFlush) {
-        if (serverConnection.isReplica() && !asList(REPL, WRITE).contains(getHandlerType())) {
+        if (serverConnection.isReplica() && !REPL.equals(getHandlerType()) ) {
             return;
         }
 
