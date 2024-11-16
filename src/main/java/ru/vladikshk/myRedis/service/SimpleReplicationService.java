@@ -69,30 +69,32 @@ public class SimpleReplicationService implements ReplicationService {
     public void sendCommand(byte[] command) {
         Set<ReplicaConnection> failedReplicas = new HashSet<>();
         String commandStr = new String(command);
-        replicas.forEach(repl ->
-            CompletableFuture.runAsync(() -> {
-                try {
-                    repl.getOut().write(command);
-                    repl.getOut().flush();
-                    repl.setBytesSended(repl.getBytesSended() + command.length);
-                    repl.getPendingCommands().add(commandStr);
-                    repl.getOut().write(new RArray(List.of("REPLCONF", "GETACK", "*")).getBytes());
-                    repl.getOut().flush();
-                    repl.getIn().readLine(); // wait until received answer
-                } catch (IOException e) {
-                    log.error("Couldn't send command to replica", e);
-                    failedReplicas.add(repl);
-                    try {
-                        repl.getOut().close();
-                    } catch (IOException closeEx) {
-                        log.error("Couldn't close output stream of failed replica", closeEx);
-                    }
+        replicas.forEach(repl -> {
+                synchronized (repl.getIn()) {
+                    CompletableFuture.runAsync(() -> {
+                        try {
+                            repl.getOut().write(command);
+                            repl.getOut().flush();
+                            repl.setBytesSended(repl.getBytesSended() + command.length);
+                            repl.getPendingCommands().add(commandStr);
+                            repl.getOut().write(new RArray(List.of("REPLCONF", "GETACK", "*")).getBytes());
+                            repl.getOut().flush();
+                            repl.getIn().readLine(); // wait until received answer
+                        } catch (IOException e) {
+                            log.error("Couldn't send command to replica", e);
+                            failedReplicas.add(repl);
+                            try {
+                                repl.getOut().close();
+                            } catch (IOException closeEx) {
+                                log.error("Couldn't close output stream of failed replica", closeEx);
+                            }
+                        }
+                    }).thenRun(() -> repl.getPendingCommands().remove(commandStr));
                 }
-            }).thenRun(() -> repl.getPendingCommands().remove(commandStr))
+            }
         );
         replicas.removeAll(failedReplicas); // Remove failed replicas after processing
     }
-
 
 
     @Override
