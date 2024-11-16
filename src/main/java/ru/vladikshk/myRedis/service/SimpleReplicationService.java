@@ -67,15 +67,15 @@ public class SimpleReplicationService implements ReplicationService {
     }
 
     @Override
-    public void sendCommand(byte[] command) {
+    public synchronized void sendCommand(byte[] command) {
         Set<ReplicaConnection> failedReplicas = new HashSet<>();
         replicas.forEach(repl -> {
                 try {
-                    repl.getOut().write(command);
-                    repl.getOut().flush();
-                    repl.setBytesSended(repl.getBytesSended() + command.length);
-                    repl.getOut().write(new RArray(List.of("REPLCONF", "GETACK", "*")).getBytes());
-                    repl.getOut().flush();
+                        repl.getOut().write(command);
+                        repl.getOut().flush();
+                        repl.setBytesSended(repl.getBytesSended() + command.length);
+                        repl.getOut().write(new RArray(List.of("REPLCONF", "GETACK", "*")).getBytes());
+                        repl.getOut().flush();
                 } catch (IOException e) {
                     log.error("Couldn't send command to replica", e);
                     failedReplicas.add(repl);
@@ -115,7 +115,7 @@ public class SimpleReplicationService implements ReplicationService {
     }
 
     @Override
-    public void setBytesAcknowledged(ServerConnection connection, int bytesAcked) {
+    public synchronized void setBytesAcknowledged(ServerConnection connection, int bytesAcked) {
         replicas.stream()
             .filter(repl -> repl.getServerConnection().equals(connection))
             .findAny()
