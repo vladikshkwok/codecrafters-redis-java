@@ -16,6 +16,6 @@ public class ReplicaConnection {
     private final ServerConnection serverConnection;
     private final OutputStream out;
     private final BufferedReader in;
-    private final BlockingQueue<String> pendingCommands;
-    private int bytesSended;
+    private volatile int bytesSended;
+    private volatile int bytesAcknowledged;
 }

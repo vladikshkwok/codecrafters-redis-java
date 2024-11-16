@@ -13,6 +13,7 @@ import java.net.Socket;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.*;
 
@@ -62,34 +63,27 @@ public class SimpleReplicationService implements ReplicationService {
     }
 
     private static ReplicaConnection getReplicaConnection(ServerConnection serverConnection) {
-        return new ReplicaConnection(serverConnection, serverConnection.getOut(), serverConnection.getReader(), new PriorityBlockingQueue<>());
+        return new ReplicaConnection(serverConnection, serverConnection.getOut(), serverConnection.getReader());
     }
 
     @Override
     public void sendCommand(byte[] command) {
         Set<ReplicaConnection> failedReplicas = new HashSet<>();
-        String commandStr = new String(command);
         replicas.forEach(repl -> {
-                synchronized (repl.getIn()) {
-                    CompletableFuture.runAsync(() -> {
-                        try {
-                            repl.getOut().write(command);
-                            repl.getOut().flush();
-                            repl.setBytesSended(repl.getBytesSended() + command.length);
-                            repl.getPendingCommands().add(commandStr);
-                            repl.getOut().write(new RArray(List.of("REPLCONF", "GETACK", "*")).getBytes());
-                            repl.getOut().flush();
-                            repl.getIn().readLine(); // wait until received answer
-                        } catch (IOException e) {
-                            log.error("Couldn't send command to replica", e);
-                            failedReplicas.add(repl);
-                            try {
-                                repl.getOut().close();
-                            } catch (IOException closeEx) {
-                                log.error("Couldn't close output stream of failed replica", closeEx);
-                            }
-                        }
-                    }).thenRun(() -> repl.getPendingCommands().remove(commandStr));
+                try {
+                    repl.getOut().write(command);
+                    repl.getOut().flush();
+                    repl.setBytesSended(repl.getBytesSended() + command.length);
+                    repl.getOut().write(new RArray(List.of("REPLCONF", "GETACK", "*")).getBytes());
+                    repl.getOut().flush();
+                } catch (IOException e) {
+                    log.error("Couldn't send command to replica", e);
+                    failedReplicas.add(repl);
+                    try {
+                        repl.getOut().close();
+                    } catch (IOException closeEx) {
+                        log.error("Couldn't close output stream of failed replica", closeEx);
+                    }
                 }
             }
         );
@@ -108,13 +102,21 @@ public class SimpleReplicationService implements ReplicationService {
         Instant expiration = Instant.now().plusMillis(timeoutMs);
         while (Instant.now().isBefore(expiration)) {
             long aknowledgedReplicas = replicas.stream()
-                .filter(repl -> repl.getPendingCommands().isEmpty())
+                .filter(repl -> repl.getBytesSended() == repl.getBytesAcknowledged())
                 .count();
             if (aknowledgedReplicas >= count || aknowledgedReplicas == replicas.size()) {
                 return;
             }
             TimeUnit.MILLISECONDS.sleep(50);
         }
+    }
+
+    @Override
+    public void setBytesAcknowledged(ServerConnection connection, int bytesAcked) {
+        replicas.stream()
+            .filter(repl -> repl.getServerConnection().equals(connection))
+            .findAny()
+            .ifPresent(replicaConnection -> replicaConnection.setBytesAcknowledged(bytesAcked));
     }
 
     private void sendHandShake(OutputStream out, InputStream in) throws IOException {
