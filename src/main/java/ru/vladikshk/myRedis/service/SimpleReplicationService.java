@@ -11,17 +11,16 @@ import ru.vladikshk.myRedis.types.RArray;
 import java.io.*;
 import java.net.Socket;
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
 
 @Slf4j
 public class SimpleReplicationService implements ReplicationService {
+    public static final RArray GET_ACK = new RArray(List.of("REPLCONF", "GETACK", "*"));
     private static volatile ReplicationService INSTANCE;
     private final RedisConfig redisConfig = RedisConfig.getInstance();
     private final Set<ReplicaConnection> replicas;
+    private final Queue<String> writeOpperations = new LinkedBlockingQueue<>();
 
     private SimpleReplicationService() {
         replicas = ConcurrentHashMap.newKeySet(); // For thread-safe operations
@@ -69,14 +68,11 @@ public class SimpleReplicationService implements ReplicationService {
     @Override
     public synchronized void sendCommand(byte[] command) {
         Set<ReplicaConnection> failedReplicas = new HashSet<>();
+        writeOpperations.add(new String(command));
         replicas.forEach(repl -> {
                 try {
-                        repl.getOut().write(command);
-                        repl.getOut().flush();
-                        repl.setBytesSended(repl.getBytesSended() + command.length);
-                        repl.getOut().write(new RArray(List.of("REPLCONF", "GETACK", "*")).getBytes());
-                        repl.getOut().flush();
-                } catch (IOException e) {
+                    sendCommandToReplica(command, repl);
+                } catch (RuntimeException e) {
                     log.error("Couldn't send command to replica", e);
                     failedReplicas.add(repl);
                     try {
@@ -90,7 +86,6 @@ public class SimpleReplicationService implements ReplicationService {
         replicas.removeAll(failedReplicas); // Remove failed replicas after processing
     }
 
-
     @Override
     public int getReplicaCount() {
         return replicas.size();
@@ -99,13 +94,17 @@ public class SimpleReplicationService implements ReplicationService {
     @SneakyThrows
     @Override
     public long waitForReplicasOrTimeout(int count, long timeoutMs) {
+        if (writeOpperations.isEmpty()) {
+            return getReplicaCount();
+        }
+        sendGetAckForReplicas();
         Instant expiration = Instant.now().plusMillis(timeoutMs);
         long acknowledged = 0;
         while (Instant.now().isBefore(expiration)) {
             acknowledged = replicas.stream()
                 .peek(repl -> log.info("Replica ({}) byteSended={}, byteAcked={}", repl.getServerConnection(),
-                    repl.getBytesSended(), repl.getBytesAcknowledged()))
-                .filter(repl -> repl.getBytesSended() == repl.getBytesAcknowledged())
+                    repl.getBytesSended() - GET_ACK.getBytes().length, repl.getBytesAcknowledged()))
+                .filter(repl -> repl.getBytesSended() - GET_ACK.getBytes().length == repl.getBytesAcknowledged())
                 .count();
             if (acknowledged >= count || acknowledged == replicas.size()) {
                 return acknowledged;
@@ -115,15 +114,21 @@ public class SimpleReplicationService implements ReplicationService {
         return acknowledged;
     }
 
+    private void sendGetAckForReplicas() {
+        replicas.forEach(
+            repl -> sendCommandToReplica(GET_ACK.getBytes(), repl)
+        );
+    }
+
     @Override
     public synchronized void setBytesAcknowledged(ServerConnection connection, int bytesAcked) {
         replicas.stream()
             .filter(repl -> repl.getServerConnection().equals(connection))
             .findAny()
-            .ifPresent(replicaConnection -> {
+            .ifPresentOrElse(replicaConnection -> {
                 log.info("Update bytes acked={} for serverConnection={}", bytesAcked, connection);
                 replicaConnection.setBytesAcknowledged(bytesAcked);
-            });
+            }, () -> log.warn("Couldn't found server connection to update bytes acked to {}", bytesAcked));
     }
 
     private void sendHandShake(OutputStream out, InputStream in) throws IOException {
@@ -162,6 +167,17 @@ public class SimpleReplicationService implements ReplicationService {
             }
         }
         return buffer.toString("UTF-8");
+    }
+
+    private void sendCommandToReplica(byte[] command, ReplicaConnection repl) {
+        try {
+            repl.getOut().write(command);
+            repl.getOut().flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        repl.setBytesSended(repl.getBytesSended() + command.length);
+        log.info("Sending command to replica ({}). bytes sended={}", repl.getServerConnection(), repl.getBytesSended());
     }
 
 }
