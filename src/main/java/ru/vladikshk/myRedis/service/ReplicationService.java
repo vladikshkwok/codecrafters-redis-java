@@ -10,6 +10,6 @@ public interface ReplicationService {
     void addReplica(ServerConnection serverConnection);
     void sendCommand(byte[] command);
     int getReplicaCount();
-    boolean waitForReplicasOrTimeout(int count, long timeoutMs);
+    long waitForReplicasOrTimeout(int count, long timeoutMs);
     void setBytesAcknowledged(ServerConnection connection, int bytesAcked);
 }

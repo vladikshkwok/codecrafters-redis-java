@@ -98,20 +98,21 @@ public class SimpleReplicationService implements ReplicationService {
 
     @SneakyThrows
     @Override
-    public boolean waitForReplicasOrTimeout(int count, long timeoutMs) {
+    public long waitForReplicasOrTimeout(int count, long timeoutMs) {
         Instant expiration = Instant.now().plusMillis(timeoutMs);
+        long acknowledged = 0;
         while (Instant.now().isBefore(expiration)) {
-            long aknowledgedReplicas = replicas.stream()
+            acknowledged = replicas.stream()
                 .peek(repl -> log.info("Replica ({}) byteSended={}, byteAcked={}", repl.getServerConnection(),
                     repl.getBytesSended(), repl.getBytesAcknowledged()))
                 .filter(repl -> repl.getBytesSended() == repl.getBytesAcknowledged())
                 .count();
-            if (aknowledgedReplicas >= count || aknowledgedReplicas == replicas.size()) {
-                return true;
+            if (acknowledged >= count || acknowledged == replicas.size()) {
+                return acknowledged;
             }
             TimeUnit.MILLISECONDS.sleep(50);
         }
-        return false;
+        return acknowledged;
     }
 
     @Override
